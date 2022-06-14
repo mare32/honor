@@ -1,6 +1,6 @@
 <template>
 <div class="home">
-  <p class="headline grey--text">Home</p>
+  <p class="headline grey--text text-center">Home</p>
     <v-container class="my-5">
       <v-layout row class="mb-3">
         <v-tooltip top small>
