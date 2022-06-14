@@ -13,7 +13,8 @@
             </v-btn>
         </v-app-bar>
         <v-navigation-drawer app absolute temporary v-model="drawer" class="teal">
-            <v-list dark>
+            <v-list dark class="pb-5">
+                
                 <v-list-item
                 v-for="([icon, text,route]) in items"
                 :key="text"
@@ -28,22 +29,23 @@
                 </v-list-item-content>
                 </v-list-item>
             </v-list>
+            <Popup/>
         </v-navigation-drawer>
     </nav>
 </template>
 
 <script>
+import Popup from '@/components/Popup.vue'
 export default {
     name:'Navbar',
+    components:{Popup},
     data(){
         return {
             drawer: false,
             items: [
             ['mdi-home', 'Home','/'],
-            ['mdi-book-plus', 'New post','/new'],
             ['mdi-book-open-page-variant','Your posts', '/your-posts'],
             ['mdi-account', 'Profile','/profile'],
-            ['mdi-cog', 'Examples','/examples'],
             ],
         }
     },
