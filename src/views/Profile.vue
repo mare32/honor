@@ -10,7 +10,7 @@
         {{param.paramName}}
       </v-expansion-panel-header>
       <v-expansion-panel-content>
-        <v-form>
+        <v-form @submit="handleFormData">
             <v-container>
                 <v-row>
                     <v-col cols="6" sm="6">
@@ -22,7 +22,7 @@
                         </div>
                     </v-col>
                     <v-col cols="6" sm="6">
-                        <v-btn>Save changes</v-btn>
+                        <v-btn type="submit">Save changes</v-btn>
                     </v-col>
                 </v-row>
             </v-container>
@@ -44,6 +44,11 @@ export default {
                 {paramName:'Last name',value:'Peric'},
                 {paramName:'Password',value:''}
             ]
+        }
+    },
+    methods:{
+        handleFormData(){
+
         }
     }
 }
