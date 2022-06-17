@@ -3,8 +3,8 @@
         <v-app-bar flat app>
             <v-app-bar-nav-icon class="grey--text" @click="drawer = !drawer"></v-app-bar-nav-icon>
             <v-toolbar-title flat class="grey--text">
-                <span class="font-weight-light ">Defense of</span>
-                <span> Blograd</span>
+                <span class="font-weight-light ">Odbrana</span>
+                <span> Blograda</span>
             </v-toolbar-title>
             <v-spacer></v-spacer>
             <v-btn text color="grey">
@@ -29,16 +29,20 @@
                 </v-list-item-content>
                 </v-list-item>
             </v-list>
-            <Popup/>
+            <Popup v-if="logged"/>
+            <LoginPopup v-if="!logged" class="my-3"/>
+            <RegisterPopup v-if="!logged"/>
         </v-navigation-drawer>
     </nav>
 </template>
 
 <script>
 import Popup from '@/components/Popup.vue'
+import LoginPopup from '@/components/LoginPopup.vue'
+import RegisterPopup from '@/components/RegisterPopup.vue'
 export default {
     name:'Navbar',
-    components:{Popup},
+    components:{Popup,LoginPopup,RegisterPopup},
     data(){
         return {
             drawer: false,
@@ -47,6 +51,7 @@ export default {
             ['mdi-book-open-page-variant','Your posts', '/your-posts'],
             ['mdi-account', 'Profile','/profile'],
             ],
+            logged:false
         }
     },
     

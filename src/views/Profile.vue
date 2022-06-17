@@ -34,6 +34,7 @@
 </template>
 
 <script>
+import axios from 'axios'
 export default {
     name:'Profile',
     data(){
@@ -50,6 +51,16 @@ export default {
         handleFormData(){
 
         }
+    },
+    mounted(){
+        // pingovati putem axiosa
+        // http://localhost:5000/api/token
+        axios.post('http://localhost:5000/api/token',{
+            email:"pera@gmail.com",
+            password:"lozinka"
+        }).then(function(response){
+            console.log(response.data.token);
+        })
     }
 }
 </script>
@@ -57,3 +68,9 @@ export default {
 <style>
 
 </style>
+
+
+
+
+
+
