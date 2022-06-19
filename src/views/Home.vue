@@ -21,12 +21,30 @@
         </template>
           <span>Sort by author</span>
         </v-tooltip>
+        <v-tooltip top small>
+           <template v-slot:activator="{on, attrs}">
+        <v-btn text color="grey" @click="sortBy('health')" v-on="on" v-bind="attrs">
+          <v-icon left small>mdi-water</v-icon>
+          <span class="caption text-lowercase">By Health</span>
+        </v-btn>
+        </template>
+          <span>Sort by health</span>
+        </v-tooltip>
+        <v-tooltip top small>
+           <template v-slot:activator="{on, attrs}">
+        <v-btn text color="grey" @click="sortBy('createdAt')" v-on="on" v-bind="attrs">
+          <v-icon left small>mdi-calendar-range</v-icon>
+          <span class="caption text-lowercase">By Date</span>
+        </v-btn>
+        </template>
+          <span>Sort by date</span>
+        </v-tooltip>
         <span>
-          <v-text-field dense clearable label="Search" single-line solo></v-text-field>
+          <v-text-field dense label="Search" single-line solo v-model="search"></v-text-field>
         </span>
       </v-layout>
 
-      <v-card v-for="post in posts" :key="post.id" class="my-5">
+      <v-card v-for="post in FilteredPosts" :key="post.id" class="my-5">
         <v-row row wrap :class="`pr-12 pa-3 post ${post.status}`">
           <v-col cols="12" md="6">
             <div class="caption grey--text">Post title</div>
@@ -54,18 +72,25 @@
           <v-icon large>mdi-sword</v-icon>
         </v-btn>
           <v-progress-linear
+            v-if="post.health < 50"
             v-model="post.health"
-            height="15"
+            height="20"
             color="red"
             rounded
           >
-            <strong>{{ Math.ceil(post.health) }}%</strong>
+            <strong>{{ Math.ceil(post.health) }}<v-icon>mdi-water</v-icon></strong>
+          </v-progress-linear>
+          <v-progress-linear
+            v-else
+            v-model="post.health"
+            height="20"
+            color="green"
+            rounded
+          >
+            <strong>{{ Math.ceil(post.health) }}<v-icon dark>mdi-water</v-icon></strong>
           </v-progress-linear>
           <v-btn class="ma-5" fab color="cyan" dark>
-            <!-- <v-icon>mdi-shield-sword</v-icon> -->
             <v-icon large>mdi-shield-half-full</v-icon>
-            <!-- <v-icon>mdi-shield-star</v-icon> -->
-            <!-- <v-icon>mdi-shield</v-icon> -->
           </v-btn>
         </v-row>
       </v-card>
@@ -93,10 +118,14 @@
           {id:4,title:"Cetvrta objava",author:"Tika Tikic",
           content:"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sit amet consequat leo, at venenatis libero. Quisque iaculis egestas iaculis. Nulla facilisi. Vivamus varius rutrum felis quis finibus. Nam imperdiet, sem nec viverra gravida, est elit posuere dui, ac ornare velit velit vel metus. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nunc cursus eros ex, at venenatis purus porttitor et. Aliquam erat volutpat. Pellentesque fringilla rhoncus dolor, ut accumsan massa consequat non. Nulla lacinia nunc in dolor faucibus, ac gravida quam auctor. Sed ultrices rhoncus dolor",
           createdAt: "16.06.2022",status:"alive",health:15},
+          {id:5,title:"Peta objava",author:"Mika Mikic",
+          content:"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sit amet consequat leo, at venenatis libero. Quisque iaculis egestas iaculis. Nulla facilisi. Vivamus varius rutrum felis quis finibus. Nam imperdiet, sem nec viverra gravida, est elit posuere dui, ac ornare velit velit vel metus. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nunc cursus eros ex, at venenatis purus porttitor et. Aliquam erat volutpat. Pellentesque fringilla rhoncus dolor, ut accumsan massa consequat non. Nulla lacinia nunc in dolor faucibus, ac gravida quam auctor. Sed ultrices rhoncus dolor",
+          createdAt: "17.06.2022",status:"alive",health:50},
         ],
         sortedBy:'author',
         sortedHow:'asc',
-        search:''
+        search:'',
+        matchingPosts:[]
       }
     },
     methods: {
@@ -127,21 +156,44 @@
             this.sortedBy = 'author'
           }
         }
-      },
-      search(){
-        
+        if(prop === "health")
+        {
+          if(this.sortedHow === 'asc'){
+            this.posts.sort((a,b) => a[prop] < b[prop] ? -1 : 1)
+            this.sortedHow = 'desc'
+            this.sortedBy = 'health'
+          }
+          else{
+            this.posts.sort((a,b) => a[prop] > b[prop] ? -1 : 1)
+            this.sortedHow = 'asc'
+            this.sortedBy = 'health'
+          }
+        }
+        if(prop === "createdAt")
+        {
+          if(this.sortedHow === 'asc'){
+            this.posts.sort((a,b) => a[prop] < b[prop] ? -1 : 1)
+            this.sortedHow = 'desc'
+            this.sortedBy = 'createdAt'
+          }
+          else{
+            this.posts.sort((a,b) => a[prop] > b[prop] ? -1 : 1)
+            this.sortedHow = 'asc'
+            this.sortedBy = 'createdAt'
+          }
+        }
       }
-
+    },
+    computed:{
+      FilteredPosts(){
+       return this.posts.filter(post => { return post.title.toLowerCase().includes(this.search.toLowerCase()) })
+      }
     },
     mounted(){
-      axios.get('http://localhost:5000/api/blogposts',{
-            }).then(function(response){
-                console.log(response.data.data);
-            })
-      if(localStorage.getItem("token")){
-        console.log("1")
-        console.log(localStorage.getItem("token"))
-      }
+      // axios.get('http://localhost:5000/api/blogposts',{
+      //       }).then(function(response){
+      //           console.log(response.data.data);
+      //       })
       
     }
   }
