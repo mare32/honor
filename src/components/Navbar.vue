@@ -7,8 +7,8 @@
                 <span> Blograda</span>
             </v-toolbar-title>
             <v-spacer></v-spacer>
-            <v-btn text color="grey">
-                <span>Sign Out</span>
+            <v-btn text color="grey" v-if="logged">
+                <span @click="SignOut">Sign Out</span>
                 <v-icon right>mdi-exit-to-app</v-icon>
             </v-btn>
         </v-app-bar>
@@ -28,11 +28,37 @@
                     <v-list-item-title>{{ text }}</v-list-item-title>
                 </v-list-item-content>
                 </v-list-item>
+
+                <v-list-item v-if="logged"
+                router to="/your-posts"
+                >
+                <v-list-item-icon>
+                    <v-icon>mdi-book-open-page-variant</v-icon>
+                </v-list-item-icon>
+
+                <v-list-item-content>
+                    <v-list-item-title>Your posts</v-list-item-title>
+                </v-list-item-content>
+                </v-list-item>
+
+                <v-list-item v-if="logged"
+                router to="/profile"
+                >
+                <v-list-item-icon>
+                    <v-icon>mdi-account</v-icon>
+                </v-list-item-icon>
+
+                <v-list-item-content>
+                    <v-list-item-title>Profile</v-list-item-title>
+                </v-list-item-content>
+                </v-list-item>
+
             </v-list>
             <Popup v-if="logged"/>
             <LoginPopup v-if="!logged" class="my-3"/>
             <RegisterPopup v-if="!logged"/>
         </v-navigation-drawer>
+        <Alert absolute />
     </nav>
 </template>
 
@@ -40,20 +66,38 @@
 import Popup from '@/components/Popup.vue'
 import LoginPopup from '@/components/LoginPopup.vue'
 import RegisterPopup from '@/components/RegisterPopup.vue'
+import Alert from '@/components/Alert.vue'
 export default {
     name:'Navbar',
-    components:{Popup,LoginPopup,RegisterPopup},
+    components:{Popup,LoginPopup,RegisterPopup,Alert},
     data(){
         return {
             drawer: false,
             items: [
-            ['mdi-home', 'Home','/'],
-            ['mdi-book-open-page-variant','Your posts', '/your-posts'],
-            ['mdi-account', 'Profile','/profile'],
+            ['mdi-home', 'Home','/']
             ],
             logged:false
         }
     },
+    created(){
+        if(localStorage.getItem("token"))
+            this.logged = true
+
+    },
+    methods:{
+        SignOut(){
+            localStorage.removeItem("token")
+            // this.logged = false
+            setTimeout(function()
+            {
+                this.logged = false
+                window.location.href = "/"
+            },1000)
+        }
+    },
+    updated(){
+    }
+    
     
 }
 </script>

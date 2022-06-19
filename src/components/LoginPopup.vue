@@ -82,10 +82,13 @@ export default {
                 email:this.email,
                 password:this.password
             }).then(function(response){
-                console.log(response.data.token);
+                // console.log(response.data.token);
+                localStorage.setItem("token", response.data.token)
             })
+            setTimeout(function(){window.location.reload()},1000)
       }
-    }
+    },
+    
 }
 </script>
 

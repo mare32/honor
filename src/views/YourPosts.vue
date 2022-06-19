@@ -1,7 +1,7 @@
 <template>
 <div class="your-posts">
     <p class="headline grey--text text-center">Your posts</p>
-    <v-containter>
+    <v-col>
         <v-row >
             <v-col cols="12" sm="6" md="4" lg="4" v-for="post in myPosts" :key="post.id">
                 <v-card class="text-center ma-3 pa-5" >
@@ -14,21 +14,23 @@
                     <div class=" text-subtitle-1 ">{{post.name}}</div>
                     <div class="grey--text">{{post.role}}</div>
                 </v-card-text>
-                <v-card-action>
+                <v-card>
                     <v-btn depressed class="grey--text" >
                     <v-icon small left> mdi-hand-pointing-up </v-icon>
                     <span>View</span>
                     </v-btn>
-                </v-card-action>
+                </v-card>
                 </v-card>
             </v-col>
         </v-row>
-    </v-containter>
+    </v-col>
 </div>
 </template>
 
 <script>
+import Vuetify from 'vuetify'
 export default {
+    components:{Vuetify},
     name:'YourPosts',
     data(){
         return {

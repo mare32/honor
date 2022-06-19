@@ -86,7 +86,8 @@
 export default {
     name:'RegisterPopup',
     data:() =>({
-        dialog: false
+        dialog: false,
+        show:true
     })
 }
 </script>
