@@ -137,7 +137,7 @@ export default {
             'Content-Type' : 'image/png'
           }
         }
-        axios.post('http://localhost:5000/blogposts')
+        // axios.post('http://localhost:5000/blogposts')
       }
     }
 }

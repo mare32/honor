@@ -68,7 +68,7 @@
           {{post.content}}
         </v-row>
         <v-row row wrap justify="space-around" :class="`pa-12`">
-        <v-btn class="ma-5" fab color="red" dark>
+        <v-btn class="ma-5" fab color="red" dark @click="CastVote('attack')">
           <v-icon large>mdi-sword</v-icon>
         </v-btn>
           <v-progress-linear
@@ -89,7 +89,7 @@
           >
             <strong>{{ Math.ceil(post.health) }}<v-icon dark>mdi-water</v-icon></strong>
           </v-progress-linear>
-          <v-btn class="ma-5" fab color="cyan" dark>
+          <v-btn class="ma-5" fab color="cyan" dark @click="CastVote('defend')">
             <v-icon large>mdi-shield-half-full</v-icon>
           </v-btn>
         </v-row>
@@ -180,6 +180,22 @@
             this.posts.sort((a,b) => a[prop] > b[prop] ? -1 : 1)
             this.sortedHow = 'asc'
             this.sortedBy = 'createdAt'
+          }
+        }
+      },
+      CastVote(type){
+        if(!localStorage.getItem("token"))
+        {
+          console.log("Unauthorized")
+        }
+        else{
+          if(type==="attack")
+          {
+            console.log("Attacked");
+            //axios
+          }
+          else{
+            console.log("Defended");
           }
         }
       }
