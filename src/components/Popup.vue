@@ -45,6 +45,46 @@
                   label="Categories*"
                   multiple
                 ></v-autocomplete>
+                <v-col
+                  cols="12"
+                  sm="6"
+                >
+                  <v-select
+                    v-model="categoryValues"
+                    :items="categories"
+                    label="Select Categories"
+                    multiple
+                  >
+                    <template v-slot:selection="{ item, index }">
+                      <v-chip v-if="index === 0">
+                        <span>{{ item }}</span>
+                      </v-chip>
+                      <span
+                        v-if="index === 1"
+                        class="grey--text text-caption"
+                      >
+                        (+{{ categoryValues.length - 1 }} others)
+                      </span>
+                    </template>
+                  </v-select>
+                </v-col>
+              </v-col>
+              <v-col
+                cols="12"
+                sm="12"
+              >
+              <v-file-input
+                label="Add image*"
+                prepend-icon="mdi-camera"
+                accept="image/*"
+                @change="uploadImage($event)"
+              ></v-file-input>
+              </v-col>
+              <v-col cols="12">
+                <v-text-field
+                  solo
+                  label="Image alt"
+                ></v-text-field>
               </v-col>
             </v-row>
           </v-container>
@@ -74,11 +114,32 @@
 </template>
 
 <script>
+import axios from 'axios'
 export default {
     name:'Popup',
     data:() =>({
-        dialog: false
-    })
+        dialog: false,
+        image:'',
+        title:'',
+        content:'',
+        imgAlt:'',
+        categories:['Skiing', 'Ice hockey', 'Soccer', 'Basketball', 'Hockey', 'Reading', 'Writing', 'Coding', 'Basejump'],
+        categoryValues: []
+    }),
+    methods:{
+      uploadImage(event){
+        let data = new FormData();
+        data.append('name', this.image);
+        data.append('file', event.target.files[0]); 
+
+        let config = {
+          header : {
+            'Content-Type' : 'image/png'
+          }
+        }
+        axios.post('http://localhost:5000/blogposts')
+      }
+    }
 }
 </script>
 
