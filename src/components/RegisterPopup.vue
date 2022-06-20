@@ -27,6 +27,7 @@
                   solo
                   label="Firstname*"
                   required
+                  v-model="firstname"
                 ></v-text-field>
               </v-col>
             </v-row>
@@ -36,6 +37,17 @@
                   solo
                   label="Lastname*"
                   required
+                  v-model="lastname"
+                ></v-text-field>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col cols="12">
+                <v-text-field
+                  solo
+                  label="Username*"
+                  required
+                  v-model="username"
                 ></v-text-field>
               </v-col>
             </v-row>
@@ -45,6 +57,7 @@
                   solo
                   label="Email*"
                   required
+                  v-model="email"
                 ></v-text-field>
               </v-col>
             </v-row>
@@ -54,6 +67,8 @@
                   solo
                   label="Password*"
                   required
+                  type="password"
+                  v-model="password"
                 ></v-text-field>
               </v-col>
             </v-row>
@@ -69,10 +84,20 @@
             Close
           </v-btn>
           <v-spacer></v-spacer>
+        <v-alert type="success" v-if="alert">
+         Registered succesfully! Please Log in.
+        </v-alert>
+        <v-alert type="error" v-if="alertError">
+         <span v-for="error in errors" :key="error">
+          {{error}}<br/>
+         </span>
+        </v-alert>
+        <v-spacer></v-spacer>
           <v-btn
             color="green darken-1"
             text
-            @click="dialog = false"
+            :loading="loading"
+            @click="handleRegistration"
           >
             Register
           </v-btn>
@@ -83,12 +108,52 @@
 </template>
 
 <script>
+import axios from 'axios'
 export default {
     name:'RegisterPopup',
     data:() =>({
         dialog: false,
-        show:true
-    })
+        errors: [],
+        show:true,
+        alert:false,
+        alertError:false,
+        firstname:'',
+        lastname:'',
+        email:'',
+        password:'',
+        username:'',
+        loading:false
+    }),
+    methods:{
+      handleRegistration(){
+            var vm = this
+            this.loading = true
+            this.errors = []
+            axios.post('http://localhost:5000/api/register',{
+                email:this.email,
+                password:this.password,
+                firstname:this.firstname,
+                lastname:this.lastname,
+                username:this.username,
+            }).then(function(response){
+                vm.alert = true;
+                vm.loading = false
+                vm.alertError = false
+                // window.location.reload()
+                // setTimeout(function(){window.location.reload()},1000)
+            }).catch(errors => {
+              console.log(errors);
+              vm.loading = false
+              vm.alert = false
+              for(let error of errors.response.data.errors)
+              {
+                vm.errors.push(error.error)
+              }
+              vm.alertError = true
+
+            })
+      }
+    }
 }
 </script>
 

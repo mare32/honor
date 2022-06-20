@@ -16,7 +16,7 @@
                 </v-card-text>
                 <v-card>
                     <v-btn depressed class="grey--text" >
-                    <v-icon small left> mdi-hand-pointing-up </v-icon>
+                    <v-icon small left> mdi-open-in-new </v-icon>
                     <span>View</span>
                     </v-btn>
                 </v-card>

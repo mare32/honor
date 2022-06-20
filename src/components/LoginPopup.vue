@@ -37,6 +37,7 @@
                   solo
                   label="Password*"
                   required
+                  type="password"
                   v-model="password"
                 ></v-text-field>
               </v-col>
@@ -56,6 +57,7 @@
             color="green darken-1"
             text
             @click="handleLogin"
+            :loading="loading"
           >
             Log-in
           </v-btn>
@@ -72,20 +74,27 @@ export default {
     data:() =>({
         dialog: false,
         email:'',
-        password:''
+        password:'',
+        loading:false
     }),
     mounted(){
     },
     methods:{
       handleLogin(){
+        let vm = this
+        this.loading = true
+        console.log(this.password);
             axios.post('http://localhost:5000/api/token',{
                 email:this.email,
                 password:this.password
             }).then(function(response){
-                // console.log(response.data.token);
+                vm.loading = false
                 localStorage.setItem("token", response.data.token)
+                window.location.reload()
+                // setTimeout(function(){window.location.reload()},1000)
+            }).catch(function(){
+               vm.loading = false
             })
-            setTimeout(function(){window.location.reload()},1000)
       }
     },
     
