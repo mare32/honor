@@ -43,7 +43,7 @@
           <v-text-field dense label="Search" single-line solo v-model="search"></v-text-field>
         </span>
       </v-layout>
-
+      <div v-if="FilteredDbPosts.length">
       <v-card v-for="post in FilteredDbPosts" :key="post.id" class="my-5">
         <v-row row wrap :class="`pr-12 pa-3 post ${post.status}`">
           <v-col cols="12" md="6">
@@ -94,6 +94,15 @@
           </v-btn>
         </v-row>
       </v-card>
+      </div>
+      <div v-else class="ma">
+          <v-progress-circular
+            :size="70"
+            :width="7"
+            color="cyan"
+            indeterminate
+          ></v-progress-circular> Loading posts...
+      </div>
     </v-container>
 
 </div>
@@ -126,7 +135,10 @@
         sortedHow:'asc',
         search:'',
         matchingPosts:[],
-        dbBlogPosts: []
+        dbBlogPosts: [],
+        perPage: '',
+        page:1,
+        userVotedPosts:[]
       }
     },
     methods: {
@@ -234,22 +246,52 @@
       FilteredDbPosts(){
        return this.dbBlogPosts.filter(post => { return post.title.toLowerCase().includes(this.search.toLowerCase()) })
       },
+      Vote(type,postId){
+        axios.put('http://localhost:5000/api/votes',{
+            }).then(function(response){
+                // promeni stanje dugmeta
+
+
+                // this.userVotedPosts.push(postId)
+                // return this.userVotedPosts; ili tako nesto
+            }).catch(err => {
+              console.log(err);
+            })
+      },
+      Unvote(postId,userId)
+      {
+        // dohvatiti voteId nekako 
+        axios.delete('http://localhost:5000/api/votes',{
+            }).then(function(response){
+              // promeniStanjeDugmeta (boju il tako nesto)
+              // this.userVotedPosts.pop(postId)
+              // return this.userVotedPosts; ili tako nesto
+            }).catch(err => {
+              console.log(err);
+            })
+      }
     },
     mounted(){
       var dis = this
-      axios.get('http://localhost:5000/api/blogposts',{
+      // ovo treba da bude inicijalno ucitavanje blogpost-ova, pa na klik linka iz paginacije da se poziva axios request za paginaciju
+      axios.get('http://localhost:5000/api/blogposts?perPage='+dis.perPage+'&page='+dis.page,{
             }).then(function(response){
                 dis.dbBlogPosts = response.data.data
+                  console.log(dis.dbBlogPosts.length)
                 for(let post of dis.dbBlogPosts)
                 {
                   post.createdAt = post.createdAt.split("T")
                   post.createdAt = post.createdAt[0]
                 }
+                // ispisiPaginaciju
+                if(dis.perPage == '')
+                dis.perPage = 2
             }).catch(err => {
               console.log(err);
             })
       
     }
+
   }
 </script>
 
