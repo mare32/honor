@@ -44,7 +44,7 @@
         </span>
       </v-layout>
 
-      <v-card v-for="post in FilteredPosts" :key="post.id" class="my-5">
+      <v-card v-for="post in FilteredDbPosts" :key="post.id" class="my-5">
         <v-row row wrap :class="`pr-12 pa-3 post ${post.status}`">
           <v-col cols="12" md="6">
             <div class="caption grey--text">Post title</div>
@@ -52,7 +52,7 @@
           </v-col >
           <v-col xs="2">
             <div class="caption grey--text">Author</div>
-            <div>{{post.author}}</div>
+            <div>{{post.author.username}}</div>
           </v-col >
           <v-col xs="2">
             <div class="caption grey--text">Created at</div>
@@ -125,20 +125,22 @@
         sortedBy:'author',
         sortedHow:'asc',
         search:'',
-        matchingPosts:[]
+        matchingPosts:[],
+        dbBlogPosts: []
       }
     },
     methods: {
       sortBy(prop){
+        console.log("sort")
         if(prop === "title")
         {
           if(this.sortedHow === 'asc'){
-            this.posts.sort((a,b) => a[prop] < b[prop] ? -1 : 1)
+            this.dbBlogPosts.sort((a,b) => a[prop] < b[prop] ? -1 : 1)
             this.sortedHow = 'desc'
             this.sortedBy = 'title'
           }
           else{
-            this.posts.sort((a,b) => a[prop] > b[prop] ? -1 : 1)
+            this.dbBlogPosts.sort((a,b) => a[prop] > b[prop] ? -1 : 1)
             this.sortedHow = 'asc'
             this.sortedBy = 'title'
           }
@@ -146,12 +148,12 @@
         if(prop === "author")
         {
           if(this.sortedHow === 'asc'){
-            this.posts.sort((a,b) => a[prop] < b[prop] ? -1 : 1)
+            this.dbBlogPosts.sort((a,b) => a[prop].username < b[prop].username ? -1 : 1)
             this.sortedHow = 'desc'
             this.sortedBy = 'author'
           }
           else{
-            this.posts.sort((a,b) => a[prop] > b[prop] ? -1 : 1)
+            this.dbBlogPosts.sort((a,b) => a[prop].username > b[prop].username ? -1 : 1)
             this.sortedHow = 'asc'
             this.sortedBy = 'author'
           }
@@ -159,12 +161,12 @@
         if(prop === "health")
         {
           if(this.sortedHow === 'asc'){
-            this.posts.sort((a,b) => a[prop] < b[prop] ? -1 : 1)
+            this.dbBlogPosts.sort((a,b) => a[prop] < b[prop] ? -1 : 1)
             this.sortedHow = 'desc'
             this.sortedBy = 'health'
           }
           else{
-            this.posts.sort((a,b) => a[prop] > b[prop] ? -1 : 1)
+            this.dbBlogPosts.sort((a,b) => a[prop] > b[prop] ? -1 : 1)
             this.sortedHow = 'asc'
             this.sortedBy = 'health'
           }
@@ -172,12 +174,37 @@
         if(prop === "createdAt")
         {
           if(this.sortedHow === 'asc'){
-            this.posts.sort((a,b) => a[prop] < b[prop] ? -1 : 1)
+
+            this.dbBlogPosts.sort((a,b) => 
+            {
+              let arr = a.createdAt.split("-")
+              let arr2 = b.createdAt.split("-")
+              if(arr[0] < arr2[0])
+              return -1
+              else if( arr[1] < arr2[1] && arr[0] == arr2[0])
+              return -1
+              else if( arr[2] < arr2[2] && arr[0] == arr2[0] && arr[1] == arr2[1])
+              return -1
+              else
+              return 1 
+            })
             this.sortedHow = 'desc'
             this.sortedBy = 'createdAt'
           }
           else{
-            this.posts.sort((a,b) => a[prop] > b[prop] ? -1 : 1)
+            this.dbBlogPosts.sort((a,b) => {
+              console.log("here");
+              let arr = a.createdAt.split("-")
+              let arr2 = b.createdAt.split("-")
+              if(arr[0] > arr2[0])
+              return -1
+              else if( arr[1] > arr2[1] && arr[0] == arr2[0])
+              return -1
+              else if( arr[2] > arr2[2] && arr[0] == arr2[0] && arr[1] == arr2[1])
+              return -1
+              else
+              return 1
+            })
             this.sortedHow = 'asc'
             this.sortedBy = 'createdAt'
           }
@@ -203,32 +230,43 @@
     computed:{
       FilteredPosts(){
        return this.posts.filter(post => { return post.title.toLowerCase().includes(this.search.toLowerCase()) })
-      }
+      },
+      FilteredDbPosts(){
+       return this.dbBlogPosts.filter(post => { return post.title.toLowerCase().includes(this.search.toLowerCase()) })
+      },
     },
     mounted(){
-      // axios.get('http://localhost:5000/api/blogposts',{
-      //       }).then(function(response){
-      //           console.log(response.data.data);
-      //       })
+      var dis = this
+      axios.get('http://localhost:5000/api/blogposts',{
+            }).then(function(response){
+                dis.dbBlogPosts = response.data.data
+                for(let post of dis.dbBlogPosts)
+                {
+                  post.createdAt = post.createdAt.split("T")
+                  post.createdAt = post.createdAt[0]
+                }
+            }).catch(err => {
+              console.log(err);
+            })
       
     }
   }
 </script>
 
 <style>
-  .post.alive{
+  .post.Alive{
     border-left:4px solid rgb(12, 213, 116);
   }
-  .post.dead{
+  .post.Dead{
     border-left:4px solid rgb(0, 0, 0);
   }
   .v-card{
     word-break: normal;
   }
-  .v-chip.alive{
+  .v-chip.Alive{
     background:rgb(12, 213, 116)!important;
   }
-  .v-chip.dead{
+  .v-chip.Dead{
     background:rgb(0, 0, 0)!important;
   }
 </style>
