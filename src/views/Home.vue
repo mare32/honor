@@ -40,11 +40,26 @@
           <span>Sort by date</span>
         </v-tooltip>
         <span>
-          <v-text-field dense label="Search" single-line solo v-model="search"></v-text-field>
+          <v-text-field dense label="Search" prepend-icon="mdi-magnify" single-line v-model="search" @keyup="SearchDbWithKeyword"></v-text-field>
         </span>
+      <div class="mx-5">
+        <v-select
+          :items="perPageSelect"
+          label="Per Page"
+          dense
+          prepend-icon="mdi-layers-search-outline"
+          @change="ChangePerPage"
+          v-model="perPage"
+        ></v-select>
+        <br>
+        <span class="ml-5 caption text-lowercase">Pages:</span>
+        <v-btn text color="grey" v-for="p in pages" :key="p" @click="PaginationLinkClick(p)"> <!-- PAGING -->
+          <span :class="`caption text-lowercase ${activePage == p ? 'active' : ''}`">{{p}}</span>
+        </v-btn>
+      </div>
       </v-layout>
-      <div v-if="FilteredDbPosts.length">
-      <v-card v-for="post in FilteredDbPosts" :key="post.id" class="my-5">
+      <div v-if="dbBlogPosts.length">
+      <v-card v-for="post in dbBlogPosts" :key="post.id" class="my-5">
         <v-row row wrap :class="`pr-12 pa-3 post ${post.status}`">
           <v-col cols="12" md="6">
             <div class="caption grey--text">Post title</div>
@@ -115,32 +130,18 @@
     name: 'Home',
     data() {
       return{
-        posts:[
-          {id:1,title:"Prva objava",author:"Pera Peric",
-          content:"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sit amet consequat leo, at venenatis libero. Quisque iaculis egestas iaculis. Nulla facilisi. Vivamus varius rutrum felis quis finibus. Nam imperdiet, sem nec viverra gravida, est elit posuere dui, ac ornare velit velit vel metus. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nunc cursus eros ex, at venenatis purus porttitor et. Aliquam erat volutpat. Pellentesque fringilla rhoncus dolor, ut accumsan massa consequat non. Nulla lacinia nunc in dolor faucibus, ac gravida quam auctor. Sed ultrices rhoncus dolor",
-          createdAt: "14.06.2022",status:"alive",health:35},
-          {id:2,title:"Druga objava",author:"Mika Mikic",
-          content:"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sit amet consequat leo, at venenatis libero. Quisque iaculis egestas iaculis. Nulla facilisi. Vivamus varius rutrum felis quis finibus. Nam imperdiet, sem nec viverra gravida, est elit posuere dui, ac ornare velit velit vel metus. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nunc cursus eros ex, at venenatis purus porttitor et. Aliquam erat volutpat. Pellentesque fringilla rhoncus dolor, ut accumsan massa consequat non. Nulla lacinia nunc in dolor faucibus, ac gravida quam auctor. Sed ultrices rhoncus dolor",
-          createdAt: "13.06.2022",status:"dead",health:0},
-          {id:3,title:"Treca objava",author:"Zika Zikic",
-          content:"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sit amet consequat leo, at venenatis libero. Quisque iaculis egestas iaculis. Nulla facilisi. Vivamus varius rutrum felis quis finibus. Nam imperdiet, sem nec viverra gravida, est elit posuere dui, ac ornare velit velit vel metus. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nunc cursus eros ex, at venenatis purus porttitor et. Aliquam erat volutpat. Pellentesque fringilla rhoncus dolor, ut accumsan massa consequat non. Nulla lacinia nunc in dolor faucibus, ac gravida quam auctor. Sed ultrices rhoncus dolor",
-          createdAt: "15.06.2022",status:"alive",health:85},
-          {id:4,title:"Cetvrta objava",author:"Tika Tikic",
-          content:"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sit amet consequat leo, at venenatis libero. Quisque iaculis egestas iaculis. Nulla facilisi. Vivamus varius rutrum felis quis finibus. Nam imperdiet, sem nec viverra gravida, est elit posuere dui, ac ornare velit velit vel metus. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nunc cursus eros ex, at venenatis purus porttitor et. Aliquam erat volutpat. Pellentesque fringilla rhoncus dolor, ut accumsan massa consequat non. Nulla lacinia nunc in dolor faucibus, ac gravida quam auctor. Sed ultrices rhoncus dolor",
-          createdAt: "16.06.2022",status:"alive",health:15},
-          {id:5,title:"Peta objava",author:"Mika Mikic",
-          content:"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sit amet consequat leo, at venenatis libero. Quisque iaculis egestas iaculis. Nulla facilisi. Vivamus varius rutrum felis quis finibus. Nam imperdiet, sem nec viverra gravida, est elit posuere dui, ac ornare velit velit vel metus. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nunc cursus eros ex, at venenatis purus porttitor et. Aliquam erat volutpat. Pellentesque fringilla rhoncus dolor, ut accumsan massa consequat non. Nulla lacinia nunc in dolor faucibus, ac gravida quam auctor. Sed ultrices rhoncus dolor",
-          createdAt: "17.06.2022",status:"alive",health:50},
-        ],
         sortedBy:'author',
         sortedHow:'asc',
         search:'',
-        matchingPosts:[],
         dbBlogPosts: [],
-        perPage: '',
+        perPage: 3,
         page:1,
         userVotedPosts:[],
-        token: ''
+        token: '',
+        totalCountOfPosts: 0,
+        pages:[],
+        perPageSelect:[1,2,3,5,10],
+        activePage: 1
       }
     },
     methods: {
@@ -222,7 +223,63 @@
           }
         }
       },
+      PaginationLinkClick(page){
+        this.activePage = page
+        this.page = page
+        let dis = this
+        axios.get('http://localhost:5000/api/blogposts?perPage='+dis.perPage+'&page='+page+"&keyword="+dis.search,{
+            }).then(function(response){
+                dis.dbBlogPosts = response.data.data
+                for(let post of dis.dbBlogPosts)
+                {
+                  post.createdAt = post.createdAt.split("T")
+                  post.createdAt = post.createdAt[0]
+                }
+            }).catch(err => {
+              console.log(err);
+            })
+      },
+      SearchDbWithKeyword(){
+        let dis = this
+        axios.get('http://localhost:5000/api/blogposts?perPage='+dis.perPage+'&page=1&keyword='+dis.search,{
+            }).then(function(response){
+                dis.dbBlogPosts = response.data.data
+                for(let post of dis.dbBlogPosts)
+                {
+                  post.createdAt = post.createdAt.split("T")
+                  post.createdAt = post.createdAt[0]
+                }
+                dis.pages = []
+                for(let i = 1; i <= response.data.pagesCount; i++)
+                dis.pages.push(i)
+            }).catch(err => {
+              console.log(err);
+            })
+      },
+      ChangePerPage()
+      {
+        let dis = this
+        if(this.perPage+1 >= this.totalCountOfPosts){
+          this.page = 1
+        this.activePage = 1
+        }
+        axios.get('http://localhost:5000/api/blogposts?perPage='+dis.perPage+'&page='+dis.page+"&keyword="+dis.search,{
+            }).then(function(response){
+                dis.dbBlogPosts = response.data.data
+                for(let post of dis.dbBlogPosts)
+                {
+                  post.createdAt = post.createdAt.split("T")
+                  post.createdAt = post.createdAt[0]
+                }
+                dis.pages = []
+                for(let i = 1; i <= response.data.pagesCount; i++)
+                dis.pages.push(i)
+            }).catch(err => {
+              console.log(err);
+            })
+      },
       Vote(type,postId){
+        let dis = this
         if(localStorage.getItem("token")){
           var data = JSON.stringify({
             "voteType": type,
@@ -240,8 +297,18 @@
         };
         axios(config).then(function(response){
               // promeni stanje dugmeta 
-              alert("Vote successful")
-
+              axios.get('http://localhost:5000/api/blogposts?perPage='+dis.perPage+'&page='+dis.page+"&keyword="+dis.search,{
+            }).then(function(response){
+                dis.dbBlogPosts = response.data.data
+                for(let post of dis.dbBlogPosts)
+                {
+                  post.createdAt = post.createdAt.split("T")
+                  post.createdAt = post.createdAt[0]
+                }
+                
+            }).catch(err => {
+              console.log(err);
+            })
               // this.userVotedPosts.push(postId)
               // return this.userVotedPosts; ili tako nesto
           }).catch(err => {
@@ -254,9 +321,25 @@
       },
       Unvote(postId,userId)
       {
+        let dis = this
         // dohvatiti voteId nekako 
         axios.delete('http://localhost:5000/api/votes',{
             }).then(function(response){
+
+              axios.get('http://localhost:5000/api/blogposts?perPage='+dis.perPage+'&page='+dis.page+"&keyword="+dis.search,{
+            }).then(function(response){
+                dis.dbBlogPosts = response.data.data
+                for(let post of dis.dbBlogPosts)
+                {
+                  post.createdAt = post.createdAt.split("T")
+                  post.createdAt = post.createdAt[0]
+                }
+                dis.pages = []
+                for(let i = 1; i <= response.data.pagesCount; i++)
+                dis.pages.push(i)
+            }).catch(err => {
+              console.log(err);
+            })
               // promeniStanjeDugmeta (boju il tako nesto)
               // this.userVotedPosts.pop(postId)
               // return this.userVotedPosts; ili tako nesto
@@ -273,9 +356,6 @@
       }
     },
     computed:{
-      FilteredPosts(){
-       return this.posts.filter(post => { return post.title.toLowerCase().includes(this.search.toLowerCase()) })
-      },
       FilteredDbPosts(){
        return this.dbBlogPosts.filter(post => { return post.title.toLowerCase().includes(this.search.toLowerCase()) })
       },
@@ -286,15 +366,17 @@
       // ovo treba da bude inicijalno ucitavanje blogpost-ova, pa na klik linka iz paginacije da se poziva axios request za paginaciju
       axios.get('http://localhost:5000/api/blogposts?perPage='+dis.perPage+'&page='+dis.page,{
             }).then(function(response){
+              dis.totalCountOfPosts = response.data.totalCount // TOTAL COUNT
+              for(let i = 1; i <= response.data.pagesCount; i++)
+                dis.pages.push(i)  // broj stranica
+
+
                 dis.dbBlogPosts = response.data.data
                 for(let post of dis.dbBlogPosts)
                 {
                   post.createdAt = post.createdAt.split("T")
                   post.createdAt = post.createdAt[0]
                 }
-                // ispisiPaginaciju
-                if(dis.perPage == '')
-                dis.perPage = 2
             }).catch(err => {
               console.log(err);
             })
@@ -303,7 +385,7 @@
           const config = {
               headers: { Authorization: `Bearer ${this.token}` }
           };
-        axios.get('http://localhost:5000/api/votes?perPage=99999',config)
+        axios.get('http://localhost:5000/api/votes?perPage=99999',config) // ne kapiram poentu ovoga
              .then(function(response){
               console.log(response.data.data);
              })
@@ -333,5 +415,9 @@
     position:absolute;
     top:40%;
     left:45%;
+  }
+  .active{
+    font-size: 2em !important;
+    font-weight: bold !important;;
   }
 </style>
