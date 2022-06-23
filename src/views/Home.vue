@@ -48,7 +48,7 @@
         <v-row row wrap :class="`pr-12 pa-3 post ${post.status}`">
           <v-col cols="12" md="6">
             <div class="caption grey--text">Post title</div>
-            <router-link :to="`/posts/${post.id}`"><h2>{{post.title}}</h2></router-link>
+            <router-link :to="{name:'Post',path:'/post/'+post.id,params:{id:post.id}}"><h2>{{post.title}}</h2></router-link>
           </v-col >
           <v-col xs="2">
             <div class="caption grey--text">Author</div>
@@ -68,7 +68,7 @@
           {{post.content}}
         </v-row>
         <v-row row wrap justify="space-around" :class="`pa-12`">
-        <v-btn class="ma-5" fab color="red" dark @click="CastVote('attack')">
+        <v-btn class="ma-5" fab color="red" dark @click="Vote(1,post.id)">
           <v-icon large>mdi-sword</v-icon>
         </v-btn>
           <v-progress-linear
@@ -89,19 +89,20 @@
           >
             <strong>{{ Math.ceil(post.health) }}<v-icon dark>mdi-water</v-icon></strong>
           </v-progress-linear>
-          <v-btn class="ma-5" fab color="cyan" dark @click="CastVote('defend')">
+          <v-btn class="ma-5" fab color="cyan" dark @click="Vote(2,post.id)">
             <v-icon large>mdi-shield-half-full</v-icon>
           </v-btn>
         </v-row>
       </v-card>
       </div>
       <div v-else class="ma">
+          Loading posts...
           <v-progress-circular
             :size="70"
             :width="7"
             color="cyan"
             indeterminate
-          ></v-progress-circular> Loading posts...
+          ></v-progress-circular> 
       </div>
     </v-container>
 
@@ -138,12 +139,12 @@
         dbBlogPosts: [],
         perPage: '',
         page:1,
-        userVotedPosts:[]
+        userVotedPosts:[],
+        token: ''
       }
     },
     methods: {
       sortBy(prop){
-        console.log("sort")
         if(prop === "title")
         {
           if(this.sortedHow === 'asc'){
@@ -205,7 +206,6 @@
           }
           else{
             this.dbBlogPosts.sort((a,b) => {
-              console.log("here");
               let arr = a.createdAt.split("-")
               let arr2 = b.createdAt.split("-")
               if(arr[0] > arr2[0])
@@ -222,41 +222,35 @@
           }
         }
       },
-      CastVote(type){
-        if(!localStorage.getItem("token"))
-        {
-          console.log("Unauthorized")
-        }
-        else{
-          if(type==="attack")
-          {
-            console.log("Attacked");
-            //axios
-          }
-          else{
-            console.log("Defended");
-          }
-        }
-      }
-    },
-    computed:{
-      FilteredPosts(){
-       return this.posts.filter(post => { return post.title.toLowerCase().includes(this.search.toLowerCase()) })
-      },
-      FilteredDbPosts(){
-       return this.dbBlogPosts.filter(post => { return post.title.toLowerCase().includes(this.search.toLowerCase()) })
-      },
       Vote(type,postId){
-        axios.put('http://localhost:5000/api/votes',{
-            }).then(function(response){
-                // promeni stanje dugmeta
+        if(localStorage.getItem("token")){
+          var data = JSON.stringify({
+            "voteType": type,
+            "blogPostId": postId
+          });
+          var config = {
+          method: 'put',
+          url: 'http://localhost:5000/api/votes',
+          
+          headers: { 
+            'Authorization': 'Bearer '+localStorage.getItem("token"), 
+            'Content-Type': 'application/json'
+          },
+          data : data
+        };
+        axios(config).then(function(response){
+              // promeni stanje dugmeta 
+              alert("Vote successful")
 
-
-                // this.userVotedPosts.push(postId)
-                // return this.userVotedPosts; ili tako nesto
-            }).catch(err => {
-              console.log(err);
-            })
+              // this.userVotedPosts.push(postId)
+              // return this.userVotedPosts; ili tako nesto
+          }).catch(err => {
+            console.log(err);
+          })
+            }
+            else{
+              alert("Unauthorized to vote")
+            }
       },
       Unvote(postId,userId)
       {
@@ -269,7 +263,23 @@
             }).catch(err => {
               console.log(err);
             })
+      },
+      CheckIfVoted(postId,voteType)
+      {
+        if(this.userVotedPosts.includes(postId))
+        {
+          // treba i tip nekako proveriti najbolje da userVotedPosts sadrzi id/tip parove il makar da se spoje pa da splitujem ovde
+        }
       }
+    },
+    computed:{
+      FilteredPosts(){
+       return this.posts.filter(post => { return post.title.toLowerCase().includes(this.search.toLowerCase()) })
+      },
+      FilteredDbPosts(){
+       return this.dbBlogPosts.filter(post => { return post.title.toLowerCase().includes(this.search.toLowerCase()) })
+      },
+      
     },
     mounted(){
       var dis = this
@@ -277,7 +287,6 @@
       axios.get('http://localhost:5000/api/blogposts?perPage='+dis.perPage+'&page='+dis.page,{
             }).then(function(response){
                 dis.dbBlogPosts = response.data.data
-                  console.log(dis.dbBlogPosts.length)
                 for(let post of dis.dbBlogPosts)
                 {
                   post.createdAt = post.createdAt.split("T")
@@ -289,7 +298,16 @@
             }).catch(err => {
               console.log(err);
             })
-      
+        if(localStorage.getItem("token")){
+          this.token = localStorage.getItem("token")
+          const config = {
+              headers: { Authorization: `Bearer ${this.token}` }
+          };
+        axios.get('http://localhost:5000/api/votes?perPage=99999',config)
+             .then(function(response){
+              console.log(response.data.data);
+             })
+            }
     }
 
   }
@@ -310,5 +328,10 @@
   }
   .v-chip.Dead{
     background:rgb(0, 0, 0)!important;
+  }
+  .ma{
+    position:absolute;
+    top:40%;
+    left:45%;
   }
 </style>

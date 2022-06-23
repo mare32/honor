@@ -3,6 +3,7 @@ import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
 import YourPosts from '../views/YourPosts.vue'
 import Profile from '../views/Profile.vue'
+import Post from '../views/Post.vue'
 
 Vue.use(VueRouter)
 
@@ -21,6 +22,12 @@ const routes = [
     path: '/profile',
     name: 'profile',
     component: Profile
+  },
+  {
+    path:'/post/:id',
+    name:'Post',
+    component: Post,
+    props: true
   },
 ]
 

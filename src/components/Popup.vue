@@ -77,6 +77,7 @@
                 label="Add image*"
                 prepend-icon="mdi-camera"
                 accept="image/*"
+                v-model="image"
                 @change="uploadImage($event)"
               ></v-file-input>
               </v-col>
@@ -115,11 +116,13 @@
 
 <script>
 import axios from 'axios'
+import FormData from 'form-data'
+// import fs from 'fs'
 export default {
     name:'Popup',
     data:() =>({
         dialog: false,
-        image:'',
+        image:null,
         title:'',
         content:'',
         imgAlt:'',
@@ -130,14 +133,43 @@ export default {
       uploadImage(event){
         let data = new FormData();
         data.append('name', this.image);
-        data.append('file', event.target.files[0]); 
-
+        // data.append('file', event.target.files[0]); 
+        console.log(this.image)
         let config = {
           header : {
             'Content-Type' : 'image/png'
           }
         }
         // axios.post('http://localhost:5000/blogposts')
+      },
+      postmanGeneratedAxios(){
+        var data = new FormData();
+        // data.append('Image', fs.createReadStream('/C:/Users/Gaming/Pictures/Uncategorized/chill-06.jpg'));
+        data.append('Title', this.title);
+        data.append('BlogPostContent', this.content);
+        // foreach categoryValues - kako uzeti samo value a ne naziv, mozda dodati id u naziv i uraditi split? - jedno resenje
+        data.append('categoryIds', '3');
+        data.append('categoryIds', '2');
+        // endforeach
+        data.append('imageAlt', this.imgAlt);
+
+        var config = {
+          method: 'post',
+          url: 'http://localhost:5000/api/blogposts',
+          headers: { 
+            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIyNmNjODQ3Mi0wMzZjLTQyMmYtODZiMi1kOGQ0MDQ1OGQ5NmMiLCJpc3MiOiJibG9nX2FkbWluIiwiaWF0IjoxNjU0NTg4NDIwLCJVc2VySWQiOiIxMDAyIiwiVXNlQ2FzZXMiOiJbMjAwNSwyMDEyLDIwMTRdIiwiRW1haWwiOiJ0b21hQGdtYWlsLmNvbSIsIm5iZiI6MTY1NDU4ODQyMCwiZXhwIjoxNjU0NTk1NjIwLCJhdWQiOiJBbnkifQ.fo4G7RZrnoDqzwvWgxJlhFm8-OmF6Rl2BTg0lTjxfu0', 
+            ...data.getHeaders()
+          },
+          data : data
+        };
+
+        axios(config)
+        .then(function (response) {
+          console.log(JSON.stringify(response.data));
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
       }
     }
 }
