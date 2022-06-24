@@ -29,8 +29,8 @@
           <v-icon large>mdi-sword</v-icon>
         </v-btn>
         <v-progress-linear
-            v-if="shield > 0"
-            :value="shield"
+            v-if="post.shield > 0"
+            :value="post.shield"
             height="20"
             color="blue"
             rounded
@@ -65,6 +65,12 @@
       <v-card class="addComment">
         <v-row row wrap>
           <v-col cols="12" md="12">
+            <span v-if="replyingTo">
+              <v-btn @click="CancelReply">
+                <v-icon>mdi-close</v-icon>
+              </v-btn>
+              Replying to <b>{{replyingTo}}</b>'s comment:{{replyingToText}}
+            </span>
               <v-text-field
                 solo
                 label="Enter your comment..."
@@ -84,13 +90,10 @@
       </v-card>
        <v-card class="commentSection" v-if="comments">
         <v-row row wrap v-for="comment in comments" :key="comment.id" class="oneComment">
-        <div v-if="userId != comment.authorId">
-          <span class="font-weight-bold">{{comment.downVotes}}</span>
-          <v-btn  class="ma-5" fab color="red" dark @click="Vote(1,post.id)">
-            <v-icon large>mdi-sword</v-icon>
+          <v-btn  class="ma-5" fab color="blue" dark @click="SetReplier(comment.user.username,comment.commentText,comment.id)">
+            <v-icon large>mdi-reply</v-icon>
           </v-btn>
-        </div>
-        <div v-else>
+        <div v-if="userId == comment.authorId">
           <v-btn class="ma-5" fab color="red" dark @click="DeleteComment(comment.id)">
             <v-icon large>mdi-delete</v-icon>
           </v-btn>
@@ -105,6 +108,10 @@
                 <v-icon large>mdi-shield-half-full</v-icon>
               </v-btn>
               <span class="font-weight-bold">{{comment.upVotes}}</span>
+              <v-btn  class="ma-5" fab color="red" dark @click="Vote(1,post.id)">
+                <v-icon large>mdi-sword</v-icon>
+              </v-btn>
+              <span class="font-weight-bold">{{comment.downVotes}}</span>
             </div>
             <div v-else>
               <v-btn class="ma-5" fab color="cyan" disabled>
@@ -146,12 +153,15 @@ export default {
     data(){
         return {
             post:null,
-            shield:1,
             comments:[],
+            subcomments:[],
             newCommentText: '',
             parentId:null,
             addCommentLoading:false,
-            userId:null
+            userId:null,
+            replyingTo:null,
+            replyingToText:null,
+            replyingToCommentId: null
         }
     },
     mounted()
@@ -203,7 +213,13 @@ export default {
         }
         axios(config)
         .then(function (response) {
-          dis.comments = response.data
+          for(let comment of response.data)
+              {
+                if(comment.parentId == null)
+                dis.comments.push(comment)
+                else
+                dis.subcomments.push(comment)
+              }
         })
         .catch(function (error) {
         console.log(error);
@@ -220,7 +236,7 @@ export default {
         else{
           let commentText = this.newCommentText;
           let postId = this.post.id;
-          let parentId = this.parentId
+          let parentId = this.replyingToCommentId
           let dis = this
           var data = JSON.stringify({
             "commentText": commentText,
@@ -251,8 +267,16 @@ export default {
             config.headers = {'Authorization': 'Bearer '+localStorage.getItem('token')}
             axios(config)
             .then(function (response) {
-              dis.comments = response.data
-              dis.$forceUpdate()
+              for(let comment in response.data)
+              {
+                if(comment.parentId == null)
+                dis.comments.push(comment)
+                else
+                dis.subcomments.push(comment)
+              }
+              // console.log("comments:"+dis.comments);
+              // console.log("subcomments:"+dis.subcomments);
+              // dis.$forceUpdate()
             })
             .catch(function (error) {
             console.log(error);
@@ -284,6 +308,23 @@ export default {
               dis.$forceUpdate()
             })
           })
+      },
+      SetReplier(username,text,commentId)
+      {
+        // console.log(username,text,commentId);
+        if(commentId == this.replyingToCommentId)
+        this.CancelReply()
+        else{
+          this.replyingTo = username;
+          this.replyingToText = text;
+          this.replyingToCommentId = commentId;
+        }
+      },
+      CancelReply()
+      {
+        this.replyingTo = null;
+        this.replyingToText = null;
+        this.replyingToCommentId = null;
       }
     }
 }
