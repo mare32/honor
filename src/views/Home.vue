@@ -351,8 +351,6 @@
             }).catch(err => {
               console.log(err);
             })
-              // this.userVotedPosts.push(postId)
-              // return this.userVotedPosts; ili tako nesto
           }).catch(err => {
             console.log(err);
           })
@@ -360,34 +358,6 @@
             else{
               alert("Unauthorized to vote")
             }
-      },
-      Unvote(postId,userId)
-      {
-        let dis = this
-        // dohvatiti voteId nekako 
-        axios.delete('http://localhost:5000/api/votes',{
-            }).then(function(response){
-
-              axios.get('http://localhost:5000/api/blogposts?perPage='+dis.perPage+'&page='+dis.page+"&keyword="+dis.search,{
-            }).then(function(response){
-                dis.dbBlogPosts = response.data.data
-                for(let post of dis.dbBlogPosts)
-                {
-                  post.createdAt = post.createdAt.split("T")
-                  post.createdAt = post.createdAt[0]
-                }
-                dis.pages = []
-                for(let i = 1; i <= response.data.pagesCount; i++)
-                dis.pages.push(i)
-            }).catch(err => {
-              console.log(err);
-            })
-              // promeniStanjeDugmeta (boju il tako nesto)
-              // this.userVotedPosts.pop(postId)
-              // return this.userVotedPosts; ili tako nesto
-            }).catch(err => {
-              console.log(err);
-            })
       }
     },
     computed:{
@@ -409,9 +379,9 @@
               // console.log(response.data.data);
               for(let vote of response.data.data)
               {
-                if(vote.voteType == 1)
+                if(vote.voteType == 1 && vote.blogPostId != null)
                 dis.userAttackedPosts.push(vote.blogPostId)
-                else
+                else if(vote.blogPostId != null)
                 dis.userDefendedPosts.push(vote.blogPostId)
               }
               console.log(dis.userAttackedPosts);

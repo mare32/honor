@@ -101,24 +101,24 @@
         </div>
             
             <div v-if="userId != comment.authorId">
-              <v-btn class="ma-5" fab color="cyan" dark @click="Vote(2,post.id)">
+              <v-btn class="ma-5" fab :color="userDefendedComments.includes(comment.id) ? 'cyan' : ''" dark @click="Vote(2,comment.id)">
                 <v-icon large>mdi-shield-half-full</v-icon>
               </v-btn>
-              <span class="font-weight-bold">{{comment.upVotes}}</span>
-              <v-btn  class="ma-5" fab color="red" dark @click="Vote(1,post.id)">
+              <span class="font-weight-bold">{{comment.downVotes}}</span>
+              <v-btn  class="ma-5" fab :color="userAttackedComments.includes(comment.id) ? 'red' : ''" dark @click="Vote(1,comment.id)">
                 <v-icon large>mdi-sword</v-icon>
               </v-btn>
-              <span class="font-weight-bold">{{comment.downVotes}}</span>
+              <span class="font-weight-bold">{{comment.upVotes}}</span>
             </div>
             <div v-else>
               <v-btn class="ma-5" fab color="cyan" disabled>
                 <v-icon large>mdi-shield-half-full</v-icon>
               </v-btn>
-              <span class="font-weight-bold">{{comment.upVotes}}</span>
+              <span class="font-weight-bold">{{comment.downVotes}}</span>
               <v-btn  class="ma-5" fab color="red" disabled>
                 <v-icon large>mdi-sword</v-icon>
               </v-btn>
-              <span class="font-weight-bold">{{comment.downVotes}}</span>
+              <span class="font-weight-bold">{{comment.upVotes}}</span>
             </div>
             <v-col cols="6" md="6">
                 <h2>{{comment.user.username}}</h2>
@@ -137,24 +137,24 @@
                   </span>
                   
                   <div v-if="userId != subcomment.authorId" style="display:inline">
-                    <v-btn class="ma-5" fab color="cyan" dark @click="Vote(2,post.id)">
+                    <v-btn class="ma-5" fab :color="userDefendedComments.includes(subcomment.id) ? 'cyan' : ''" dark @click="Vote(2,subcomment.id)">
                       <v-icon large>mdi-shield-half-full</v-icon>
                     </v-btn>
-                    <span class="font-weight-bold">{{subcomment.upVotes}}</span>
-                    <v-btn  class="ma-5" fab color="red" dark @click="Vote(1,post.id)">
+                    <span class="font-weight-bold">{{subcomment.downVotes}}</span>
+                    <v-btn  class="ma-5" fab :color="userAttackedComments.includes(subcomment.id) ? 'red' : ''" dark @click="Vote(1,subcomment.id)">
                       <v-icon large>mdi-sword</v-icon>
                     </v-btn>
-                    <span class="font-weight-bold">{{subcomment.downVotes}}</span>
+                    <span class="font-weight-bold">{{subcomment.upVotes}}</span>
                   </div>
                   <div v-else style="display:inline">
                     <v-btn class="ma-5" fab color="cyan" disabled>
                       <v-icon large>mdi-shield-half-full</v-icon>
                     </v-btn>
-                    <span class="font-weight-bold">{{subcomment.upVotes}}</span>
+                      <span class="font-weight-bold">{{subcomment.downVotes}}</span>
                     <v-btn  class="ma-5" fab color="red" disabled>
                       <v-icon large>mdi-sword</v-icon>
                     </v-btn>
-                    <span class="font-weight-bold">{{subcomment.downVotes}}</span>
+                      <span class="font-weight-bold">{{subcomment.upVotes}}</span>
                   </div>
                   <span>
                       <h2 style="display:inline"> | {{subcomment.user.username}} </h2>
@@ -201,7 +201,9 @@ export default {
             userId:null,
             replyingTo:null,
             replyingToText:null,
-            replyingToCommentId: null
+            replyingToCommentId: null,
+            userAttackedComments: [],
+            userDefendedComments: []
         }
     },
     mounted()
@@ -232,6 +234,10 @@ export default {
         console.log(error);
         });
 
+
+      
+
+
         if(localStorage.getItem('token')){
           // fetch userId
           config.url = 'http://localhost:5000/api/profile'
@@ -243,7 +249,24 @@ export default {
           .catch(function (error) {
           console.log(error);
           });
-        }
+          
+
+          config.url = 'http://localhost:5000/api/votes?perPage=99999'
+          axios(config) // BROJANJE KORISNIKOVIH GLASOVA
+             .then(function(response){
+              // console.log(response.data.data);
+              for(let vote of response.data.data)
+              {
+                if(vote.voteType == 1 && vote.commentId != null)
+                dis.userAttackedComments.push(vote.commentId)
+                else if(vote.commentId != null)
+                dis.userDefendedComments.push(vote.commentId)
+              }
+              console.log(dis.userAttackedComments);
+              console.log(dis.userDefendedComments);
+              })
+            }
+        
 
 
         config.url = 'http://localhost:5000/api/comments/'+this.id
@@ -262,7 +285,7 @@ export default {
                 else
                 dis.subcomments.push(comment)
               }
-                  
+            
               // console.log(dis.subcomments);
         })
         .catch(function (error) {
@@ -361,9 +384,9 @@ export default {
               {
                 comment.commentedAt = comment.commentedAt.split("T")
                 comment.commentedAt = comment.commentedAt[0]
-                if (comment.parentId == null && !dis.comments.some(e => e.id === comment.id)) 
+                if (comment.parentId == null) 
                   dis.comments.push(comment)
-                else if(comment.parentId != null && !dis.comments.some(e => e.id === comment.id))
+                else if(comment.parentId != null)
                   dis.subcomments.push(comment)
               }
               // console.log(dis.comments);
@@ -388,7 +411,81 @@ export default {
         this.replyingTo = null;
         this.replyingToText = null;
         this.replyingToCommentId = null;
-      }
+      },
+      Vote(type,commId){
+        let dis = this
+        if(localStorage.getItem("token")){
+          if(type == 1 && this.userAttackedComments.includes(commId))
+          {
+            let index = this.userAttackedComments.indexOf(commId);
+            this.userAttackedComments.splice(index,1)
+          }
+          else if(type == 1 && !this.userAttackedComments.includes(commId))
+          {
+            if(this.userDefendedComments.includes(commId))
+            {
+              let index = this.userDefendedComments.indexOf(commId);
+              this.userDefendedComments.splice(index,1)
+            }
+            this.userAttackedComments.push(commId)
+          }
+          if(type == 2 && this.userDefendedComments.includes(commId))
+          {
+            let index = this.userDefendedComments.indexOf(commId);
+            this.userDefendedComments.splice(index,1)
+          }
+          else if(type == 2 && !this.userDefendedComments.includes(commId))
+          {
+            if(this.userAttackedComments.includes(commId))
+            {
+              let index = this.userAttackedComments.indexOf(commId);
+              this.userAttackedComments.splice(index,1)
+            }
+            this.userDefendedComments.push(commId)
+          }
+          
+          console.log("Attacked comments:",this.userAttackedComments);
+          console.log("Defended comments:",this.userDefendedComments);
+          var data = JSON.stringify({
+            "voteType": type,
+            "commentId": commId
+          });
+          var config = {
+          method: 'put',
+          url: 'http://localhost:5000/api/votes',
+          
+          headers: { 
+            'Authorization': 'Bearer '+localStorage.getItem("token"), 
+            'Content-Type': 'application/json'
+          },
+          data : data
+        };
+        axios(config).then(function(response){
+              axios.get('http://localhost:5000/api/comments/'+dis.post.id,{
+            }).then(function(response){
+              dis.subcomments = []
+                dis.comments = []
+                for(let comment of response.data)
+                {
+                  comment.commentedAt = comment.commentedAt.split("T")
+                  comment.commentedAt = comment.commentedAt[0]
+                  if (comment.parentId == null) 
+                    dis.comments.push(comment)
+                  else if(comment.parentId != null)
+                    dis.subcomments.push(comment)
+                }
+                dis.$forceUpdate()
+            }).catch(err => {
+              console.log(err);
+            })
+          }).catch(err => {
+            console.log(err);
+          })
+            }
+            else{
+              alert("Unauthorized to vote")
+            }
+      },
     }
 }
 </script>
