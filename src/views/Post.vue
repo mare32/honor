@@ -90,6 +90,7 @@
       </v-card>
        <v-card class="commentSection" v-if="comments">
         <v-row row wrap v-for="comment in comments" :key="comment.id" class="oneComment">
+        <v-icon>mdi-comment</v-icon>
           <v-btn  class="ma-5" fab color="blue" dark @click="SetReplier(comment.user.username,comment.commentText,comment.id)">
             <v-icon large>mdi-reply</v-icon>
           </v-btn>
@@ -98,11 +99,7 @@
             <v-icon large>mdi-delete</v-icon>
           </v-btn>
         </div>
-            <v-col cols="6" md="6">
-                <h2>{{comment.user.username}}</h2>
-                <h4>{{comment.commentText}}</h4>
-                <h4>{{comment.commentedAt}}</h4>
-            </v-col>
+            
             <div v-if="userId != comment.authorId">
               <v-btn class="ma-5" fab color="cyan" dark @click="Vote(2,post.id)">
                 <v-icon large>mdi-shield-half-full</v-icon>
@@ -122,6 +119,49 @@
                 <v-icon large>mdi-sword</v-icon>
               </v-btn>
               <span class="font-weight-bold">{{comment.downVotes}}</span>
+            </div>
+            <v-col cols="6" md="6">
+                <h2>{{comment.user.username}}</h2>
+                <h4>{{comment.commentText}}</h4>
+                <h4>{{comment.commentedAt}}</h4>
+            </v-col>
+            <br>
+
+            <div style="width:100%; margin-left: 10em;" v-for="subcomment in subcomments" :key="subcomment.id">
+                <div v-if="subcomment.parentId == comment.id">
+                  Sub comment <v-icon>mdi-arrow-right-bottom-bold</v-icon>
+                  <span v-if="userId == subcomment.authorId">
+                    <v-btn class="ma-5" fab color="red" dark @click="DeleteComment(subcomment.id)">
+                      <v-icon large>mdi-delete</v-icon>
+                    </v-btn>
+                  </span>
+                  
+                  <div v-if="userId != subcomment.authorId" style="display:inline">
+                    <v-btn class="ma-5" fab color="cyan" dark @click="Vote(2,post.id)">
+                      <v-icon large>mdi-shield-half-full</v-icon>
+                    </v-btn>
+                    <span class="font-weight-bold">{{subcomment.upVotes}}</span>
+                    <v-btn  class="ma-5" fab color="red" dark @click="Vote(1,post.id)">
+                      <v-icon large>mdi-sword</v-icon>
+                    </v-btn>
+                    <span class="font-weight-bold">{{subcomment.downVotes}}</span>
+                  </div>
+                  <div v-else style="display:inline">
+                    <v-btn class="ma-5" fab color="cyan" disabled>
+                      <v-icon large>mdi-shield-half-full</v-icon>
+                    </v-btn>
+                    <span class="font-weight-bold">{{subcomment.upVotes}}</span>
+                    <v-btn  class="ma-5" fab color="red" disabled>
+                      <v-icon large>mdi-sword</v-icon>
+                    </v-btn>
+                    <span class="font-weight-bold">{{subcomment.downVotes}}</span>
+                  </div>
+                  <span>
+                      <h2 style="display:inline"> | {{subcomment.user.username}} </h2>
+                      <h4 style="display:inline">{{subcomment.commentText}}</h4>
+                  </span>
+                      <!-- <h4 style="display:inline">{{subcomment.commentedAt}}</h4> -->
+                </div>
             </div>
         </v-row>
       </v-card>
@@ -215,11 +255,15 @@ export default {
         .then(function (response) {
           for(let comment of response.data)
               {
+                comment.commentedAt = comment.commentedAt.split("T")
+                comment.commentedAt = comment.commentedAt[0]
                 if(comment.parentId == null)
                 dis.comments.push(comment)
                 else
                 dis.subcomments.push(comment)
               }
+                  
+              // console.log(dis.subcomments);
         })
         .catch(function (error) {
         console.log(error);
@@ -237,6 +281,9 @@ export default {
           let commentText = this.newCommentText;
           let postId = this.post.id;
           let parentId = this.replyingToCommentId
+          this.replyingTo = null;
+          this.replyingToText = null;
+          this.replyingToCommentId = null;
           let dis = this
           var data = JSON.stringify({
             "commentText": commentText,
@@ -258,25 +305,29 @@ export default {
           .then(function (response) {
             dis.newCommentText = ''
             dis.addCommentLoading = false
-            dis.comments = []
+            // dis.comments = []
 
-            //
             // axiosom poslati komentar, nakon toga zavrteti spinner i ponovo dohvatiti komentare axiosom i ispisati ih
             config.method = 'get'
             config.url+='/'+postId
             config.headers = {'Authorization': 'Bearer '+localStorage.getItem('token')}
             axios(config)
             .then(function (response) {
-              for(let comment in response.data)
+                dis.subcomments = []
+                dis.comments = []
+              for(let comment of response.data)
               {
-                if(comment.parentId == null)
-                dis.comments.push(comment)
-                else
-                dis.subcomments.push(comment)
+                comment.commentedAt = comment.commentedAt.split("T")
+                comment.commentedAt = comment.commentedAt[0]
+                // if (comment.parentId == null && !dis.comments.some(e => e.id === comment.id)) 
+                if (comment.parentId == null) 
+                  dis.comments.push(comment)
+                // else if(comment.parentId != null && !dis.comments.some(e => e.id === comment.id))
+                else if(comment.parentId != null)
+                  dis.subcomments.push(comment)
               }
-              // console.log("comments:"+dis.comments);
-              // console.log("subcomments:"+dis.subcomments);
-              // dis.$forceUpdate()
+              // console.log(dis.subcomments);
+              dis.$forceUpdate()
             })
             .catch(function (error) {
             console.log(error);
@@ -304,7 +355,19 @@ export default {
             config.url = 'http://localhost:5000/api/comments/'+dis.post.id
             axios(config)
             .then(function (response) {
-              dis.comments = response.data
+              dis.subcomments = []
+                dis.comments = []
+              for(let comment of response.data)
+              {
+                comment.commentedAt = comment.commentedAt.split("T")
+                comment.commentedAt = comment.commentedAt[0]
+                if (comment.parentId == null && !dis.comments.some(e => e.id === comment.id)) 
+                  dis.comments.push(comment)
+                else if(comment.parentId != null && !dis.comments.some(e => e.id === comment.id))
+                  dis.subcomments.push(comment)
+              }
+              // console.log(dis.comments);
+              // console.log(dis.subcomments);
               dis.$forceUpdate()
             })
           })
