@@ -83,9 +83,19 @@
           {{post.content}}
         </v-row>
         <v-row row wrap justify="space-around" :class="`pa-12`">
-        <v-btn class="ma-5" fab color="red" dark @click="Vote(1,post.id)">
+        <v-btn class="ma-5" fab :color="userAttackedPosts.includes(post.id) ? 'red' : ''" dark @click="Vote(1,post.id)">
           <v-icon large>mdi-sword</v-icon>
         </v-btn>
+        <v-progress-linear
+            v-if="post.shield > 0"
+            :value="post.shield"
+            height="20"
+            color="blue"
+            rounded
+            class="my-2"
+          >
+            <strong>{{ Math.ceil(post.shield) }}<v-icon small>mdi-shield</v-icon></strong>
+          </v-progress-linear>
           <v-progress-linear
             v-if="post.health < 50"
             v-model="post.health"
@@ -104,7 +114,7 @@
           >
             <strong>{{ Math.ceil(post.health) }}<v-icon dark>mdi-water</v-icon></strong>
           </v-progress-linear>
-          <v-btn class="ma-5" fab color="cyan" dark @click="Vote(2,post.id)">
+          <v-btn class="ma-5" fab :color="userDefendedPosts.includes(post.id) ? 'cyan' : ''" dark @click="Vote(2,post.id)">
             <v-icon large>mdi-shield-half-full</v-icon>
           </v-btn>
         </v-row>
@@ -136,7 +146,8 @@
         dbBlogPosts: [],
         perPage: 3,
         page:1,
-        userVotedPosts:[],
+        userAttackedPosts:[],
+        userDefendedPosts:[],
         token: '',
         totalCountOfPosts: 0,
         pages:[],
@@ -281,6 +292,37 @@
       Vote(type,postId){
         let dis = this
         if(localStorage.getItem("token")){
+          if(type == 1 && this.userAttackedPosts.includes(postId))
+          {
+            let index = this.userAttackedPosts.indexOf(postId);
+            this.userAttackedPosts.splice(index,1)
+          }
+          else if(type == 1 && !this.userAttackedPosts.includes(postId))
+          {
+            if(this.userDefendedPosts.includes(postId))
+            {
+              let index = this.userDefendedPosts.indexOf(postId);
+              this.userDefendedPosts.splice(index,1)
+            }
+            this.userAttackedPosts.push(postId)
+          }
+          if(type == 2 && this.userDefendedPosts.includes(postId))
+          {
+            let index = this.userDefendedPosts.indexOf(postId);
+            this.userDefendedPosts.splice(index,1)
+          }
+          else if(type == 2 && !this.userDefendedPosts.includes(postId))
+          {
+            if(this.userAttackedPosts.includes(postId))
+            {
+              let index = this.userAttackedPosts.indexOf(postId);
+              this.userAttackedPosts.splice(index,1)
+            }
+            this.userDefendedPosts.push(postId)
+          }
+          
+          console.log("Attacked posts:"+this.userAttackedPosts);
+          console.log("Defended posts:"+this.userDefendedPosts);
           var data = JSON.stringify({
             "voteType": type,
             "blogPostId": postId
@@ -346,13 +388,6 @@
             }).catch(err => {
               console.log(err);
             })
-      },
-      CheckIfVoted(postId,voteType)
-      {
-        if(this.userVotedPosts.includes(postId))
-        {
-          // treba i tip nekako proveriti najbolje da userVotedPosts sadrzi id/tip parove il makar da se spoje pa da splitujem ovde
-        }
       }
     },
     computed:{
@@ -363,6 +398,26 @@
     },
     mounted(){
       var dis = this
+      // prvo glasovi korisnika ako je ulogovan
+      if(localStorage.getItem("token")){
+          this.token = localStorage.getItem("token")
+          const config = {
+              headers: { Authorization: `Bearer ${this.token}` }
+          };
+        axios.get('http://localhost:5000/api/votes?perPage=99999',config) // BROJANJE KORISNIKOVIH GLASOVA
+             .then(function(response){
+              // console.log(response.data.data);
+              for(let vote of response.data.data)
+              {
+                if(vote.voteType == 1)
+                dis.userAttackedPosts.push(vote.blogPostId)
+                else
+                dis.userDefendedPosts.push(vote.blogPostId)
+              }
+              console.log(dis.userAttackedPosts);
+              console.log(dis.userDefendedPosts);
+              })
+            }
       // ovo treba da bude inicijalno ucitavanje blogpost-ova, pa na klik linka iz paginacije da se poziva axios request za paginaciju
       axios.get('http://localhost:5000/api/blogposts?perPage='+dis.perPage+'&page='+dis.page,{
             }).then(function(response){
@@ -380,16 +435,7 @@
             }).catch(err => {
               console.log(err);
             })
-        if(localStorage.getItem("token")){
-          this.token = localStorage.getItem("token")
-          const config = {
-              headers: { Authorization: `Bearer ${this.token}` }
-          };
-        axios.get('http://localhost:5000/api/votes?perPage=99999',config) // ne kapiram poentu ovoga
-             .then(function(response){
-              console.log(response.data.data);
-             })
-            }
+        
     }
 
   }
