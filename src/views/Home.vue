@@ -148,7 +148,6 @@
         page:1,
         userAttackedPosts:[],
         userDefendedPosts:[],
-        token: '',
         totalCountOfPosts: 0,
         pages:[],
         perPageSelect:[1,2,3,5,10],
@@ -367,12 +366,13 @@
       
     },
     mounted(){
+      this.userAttackedPosts=[]
+      this.userDefendedPosts=[]
       var dis = this
       // prvo glasovi korisnika ako je ulogovan
       if(localStorage.getItem("token")){
-          this.token = localStorage.getItem("token")
           const config = {
-              headers: { Authorization: `Bearer ${this.token}` }
+              headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
           };
         axios.get('http://localhost:5000/api/votes?perPage=99999',config) // BROJANJE KORISNIKOVIH GLASOVA
              .then(function(response){

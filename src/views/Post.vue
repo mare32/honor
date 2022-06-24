@@ -25,7 +25,7 @@
           {{post.blogPostContent}}
         </v-row>
         <v-row row wrap justify="space-around" :class="`pa-12`">
-        <v-btn class="ma-5" fab color="red" dark @click="Vote(1,post.id)">
+        <v-btn class="ma-5" fab :color="userAttackedPost ? 'red' : ''" dark @click="VotePost(1)">
           <v-icon large>mdi-sword</v-icon>
         </v-btn>
         <v-progress-linear
@@ -36,7 +36,7 @@
             rounded
             class="my-2"
           >
-            <strong>{{ Math.ceil(shield) }}<v-icon small>mdi-shield</v-icon></strong>
+            <strong>{{ Math.ceil(post.shield) }} <v-icon small dark>mdi-shield</v-icon></strong>
           </v-progress-linear>
         <v-progress-linear
             v-if="post.health < post.health/2"
@@ -55,9 +55,9 @@
             color="green"
             rounded
           >
-            <strong>{{ Math.ceil(post.health) }}<v-icon dark small>mdi-water</v-icon></strong>
+            <strong>{{ Math.ceil(post.health) }}<v-icon dark>mdi-hospital</v-icon></strong>
           </v-progress-linear>
-          <v-btn class="ma-5" fab color="cyan" dark @click="Vote(2,post.id)">
+          <v-btn class="ma-5" fab :color="userDefendedPost ? 'cyan' : ''" dark @click="VotePost(2)">
             <v-icon large>mdi-shield-half-full</v-icon>
           </v-btn>
         </v-row>
@@ -203,7 +203,9 @@ export default {
             replyingToText:null,
             replyingToCommentId: null,
             userAttackedComments: [],
-            userDefendedComments: []
+            userDefendedComments: [],
+            userAttackedPost:false,
+            userDefendedPost:false
         }
     },
     mounted()
@@ -257,13 +259,15 @@ export default {
               // console.log(response.data.data);
               for(let vote of response.data.data)
               {
+                if(vote.voteType == 1 && vote.blogPostId == dis.post.id)
+                  dis.userAttackedPost = true;
+                else if(vote.voteType == 2 && vote.blogPostId == dis.post.id)
+                  dis.userDefendedPost = true;
                 if(vote.voteType == 1 && vote.commentId != null)
                 dis.userAttackedComments.push(vote.commentId)
                 else if(vote.commentId != null)
                 dis.userDefendedComments.push(vote.commentId)
               }
-              console.log(dis.userAttackedComments);
-              console.log(dis.userDefendedComments);
               })
             }
         
@@ -412,6 +416,59 @@ export default {
         this.replyingToText = null;
         this.replyingToCommentId = null;
       },
+      VotePost(type){
+        let dis = this
+        let postId = this.post.id
+        if(localStorage.getItem("token"))
+        {
+          if(type == 1 && this.userAttackedPost)
+            this.userAttackedPost = false
+          else if(type == 1 && !this.userAttackedPost)
+          {
+            this.userAttackedPost = true
+            if(this.userDefendedPost)
+              this.userDefendedPost = false
+          }
+          if(type == 2 && this.userDefendedPost)
+            this.userDefendedPost = false
+          else if(type == 2 && !this.userDefendedPost)
+            {
+              this.userDefendedPost = true
+              if(this.userAttackedPost)
+                this.userAttackedPost = false
+            }
+          var data = JSON.stringify({
+            "voteType": type,
+            "blogPostId": postId
+          });
+          var config = {
+          method: 'put',
+          url: 'http://localhost:5000/api/votes',
+          
+          headers: { 
+            'Authorization': 'Bearer '+localStorage.getItem("token"), 
+            'Content-Type': 'application/json'
+          },
+          data : data
+        };
+          axios(config).then(function(response){
+              axios.get('http://localhost:5000/api/blogposts/'+postId,{
+            }).then(function(response){
+                dis.post = response.data
+                  dis.post.createdAt = dis.post.createdAt.split("T")
+                  dis.post.createdAt = dis.post.createdAt[0]
+                dis.$forceUpdate()
+            }).catch(err => {
+              console.log(err);
+            })
+          }).catch(err => {
+            console.log(err);
+          })
+        }
+        else{
+          alert("Unauthorized - please log in to interact with posts")
+        }
+      },
       Vote(type,commId){
         let dis = this
         if(localStorage.getItem("token")){
@@ -443,9 +500,6 @@ export default {
             }
             this.userDefendedComments.push(commId)
           }
-          
-          console.log("Attacked comments:",this.userAttackedComments);
-          console.log("Defended comments:",this.userDefendedComments);
           var data = JSON.stringify({
             "voteType": type,
             "commentId": commId

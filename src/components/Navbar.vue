@@ -4,11 +4,11 @@
             <v-app-bar-nav-icon class="grey--text" @click="drawer = !drawer"></v-app-bar-nav-icon>
             <v-toolbar-title flat class="grey--text">
                 <!-- <span class="font-weight-light ">Odbrana</span> -->
-                <span> Blograd</span>
+                <span><v-icon>mdi-sword-cross</v-icon> Blograd</span>
             </v-toolbar-title>
             <v-spacer></v-spacer>
-            <v-btn text color="grey" v-if="logged">
-                <span @click="SignOut">Sign Out</span>
+            <v-btn text color="grey" v-if="logged"  @click="SignOut" :loading="loading">
+                <span>Sign Out</span>
                 <v-icon right>mdi-exit-to-app</v-icon>
             </v-btn>
         </v-app-bar>
@@ -76,7 +76,8 @@ export default {
             items: [
             ['mdi-home', 'Home','/']
             ],
-            logged:false
+            logged:false,
+            loading:false
         }
     },
     created(){
@@ -87,12 +88,13 @@ export default {
     methods:{
         SignOut(){
             localStorage.removeItem("token")
-            // this.logged = false
+            this.loading = true
             setTimeout(function()
             {
+                this.loading = false
                 this.logged = false
                 window.location.href = "/"
-            },1000)
+            },3000)
         }
     },
     updated(){
