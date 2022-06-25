@@ -1,35 +1,7 @@
 <template>
-<div class="profile">
+<div class="profile" v-if="!checkIfAdmin">
     <h1 class="headline grey--text text-center my-5">Admin Panel</h1>
     <v-expansion-panels>
-    <!-- <v-expansion-panel
-      v-for="param in profileParameters"
-      :key="param.paramName"
-    >
-      <v-expansion-panel-header>
-        {{param.paramName}}
-      </v-expansion-panel-header>
-      <v-expansion-panel-content>
-        <v-form @submit="handleFormData">
-            <v-container>
-                <v-row>
-                    <v-col cols="6" sm="6">
-                        <div v-if="param.value">
-                            
-                            <v-text-field :label="`New ${param.paramName}`" v-model="param.value" single-line solo></v-text-field>
-                        </div>
-                        <div v-else>
-                            <v-text-field :label="`New ${param.paramName}`" type="password" v-model="param.value" single-line solo></v-text-field>
-                        </div>
-                    </v-col>
-                    <v-col cols="6" sm="6">
-                        <v-btn type="submit">Save changes</v-btn>
-                    </v-col>
-                </v-row>
-            </v-container>
-        </v-form>
-      </v-expansion-panel-content>
-    </v-expansion-panel> -->
     <v-expansion-panel>
       <v-expansion-panel-header>
         Users
@@ -165,6 +137,16 @@
 
   </v-expansion-panels>
 </div>
+<div v-else class="text-center">
+    Checking for admin rights...
+    <v-progress-linear
+    color="lime"
+    indeterminate
+    reverse
+    height="10"
+    rounded
+    ></v-progress-linear>
+</div>
 </template>
 <script>
     import axios from 'axios'
@@ -172,6 +154,7 @@
     name:'Panel',
     data () {
       return {
+        loggedUser:null,
         expanded: [],
         singleExpand: false,
         dessertHeaders: [
@@ -272,7 +255,8 @@
         users:[],
         posts:[],
         categories:[],
-        logs:[]
+        logs:[],
+        checkIfAdmin:true
       }
     },
     methods:{
@@ -280,25 +264,28 @@
     },
     created(){
         if(!localStorage.getItem("token"))
-             window.location.href = "/"
+             setTimeout(function(){window.location.href = "/"},3000)
              // naci nacin kako proveriti korisnika za ulogu
              // eventualno pingovati endpoint za profil i proveriti ulogu
-    },
-    mounted(){
-            const config = {
+        const config = {
                 headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
             };
         const vm = this;
         axios.get('http://localhost:5000/api/profile',config)
              .then(function(response)
             {
-                vm.username = response.data.username
-                vm.firstname = response.data.firstName
-                vm.email = response.data.email
-                vm.lastname = response.data.lastName
+                vm.loggedUser = response.data
+                console.log(vm.loggedUser);
+            if(vm.loggedUser.role != "Admin")
+                setTimeout(function(){window.location.href = "/"},3000)
+            else
+                vm.checkIfAdmin = false
             }).catch(err => {
                 console.log(err);
             })
+    },
+    mounted(){
+            
     }
   }
 </script>

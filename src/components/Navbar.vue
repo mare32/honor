@@ -54,7 +54,7 @@
                 </v-list-item>
 
 
-                <v-list-item v-if="1"
+                <v-list-item v-if="admin"
                 router to="/admin"
                 >
                 <v-list-item-icon>
@@ -80,6 +80,7 @@ import Popup from '@/components/Popup.vue'
 import LoginPopup from '@/components/LoginPopup.vue'
 import RegisterPopup from '@/components/RegisterPopup.vue'
 import Alert from '@/components/Alert.vue'
+import axios from 'axios'
 export default {
     name:'Navbar',
     components:{Popup,LoginPopup,RegisterPopup,Alert},
@@ -97,7 +98,28 @@ export default {
     created(){
         if(localStorage.getItem("token"))
             this.logged = true
-
+        if (localStorage.getItem("token"))
+            {
+                const config = {
+                headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+                };
+            const vm = this;
+            axios.get('http://localhost:5000/api/profile',config)
+                .then(function(response)
+                {
+                    vm.loggedUser = response.data
+                    console.log(vm.loggedUser);
+                if(vm.loggedUser.role == "Admin")
+                    vm.admin = true
+                else
+                    vm.admin = false
+                }).catch(err => {
+                    console.log(err);
+                })
+            }
+            
+    },
+    mounted(){
     },
     methods:{
         SignOut(){
