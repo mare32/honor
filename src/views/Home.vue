@@ -120,7 +120,15 @@
         </v-row>
       </v-card>
       </div>
-      <div v-else class="ma">
+      <div v-else-if="networkError" class="ma">
+          <v-alert
+            elevation="10"
+            type="error"
+          >
+            Lost connection with the server
+          </v-alert>
+      </div>
+      <div v-else-if="loadingPosts" class="ma">
           Loading posts...
           <v-progress-circular
             :size="70"
@@ -128,6 +136,15 @@
             color="cyan"
             indeterminate
           ></v-progress-circular> 
+      </div>
+      <div v-else-if="!dbBlogPosts.length" class="ma">
+          <v-alert
+            elevation="10"
+            type="warning"
+            icon="mdi-ghost"
+          >
+            No results.
+          </v-alert>
       </div>
     </v-container>
 
@@ -151,7 +168,9 @@
         totalCountOfPosts: 0,
         pages:[],
         perPageSelect:[1,2,3,5,10],
-        activePage: 1
+        activePage: 1,
+        networkError: false,
+        loadingPosts: false
       }
     },
     methods: {
@@ -237,6 +256,8 @@
         this.activePage = page
         this.page = page
         let dis = this
+        this.loadingPosts = true
+        this.networkError = false
         axios.get('http://localhost:5000/api/blogposts?perPage='+dis.perPage+'&page='+page+"&keyword="+dis.search,{
             }).then(function(response){
                 dis.dbBlogPosts = response.data.data
@@ -245,14 +266,20 @@
                   post.createdAt = post.createdAt.split("T")
                   post.createdAt = post.createdAt[0]
                 }
+                dis.loadingPosts = false
             }).catch(err => {
               console.log(err);
+              if(err.code == "ERR_NETWORK")
+              dis.networkError = true
             })
       },
       SearchDbWithKeyword(){
         let dis = this
+        this.loadingPosts = true
+        this.networkError = false
         axios.get('http://localhost:5000/api/blogposts?perPage='+dis.perPage+'&page=1&keyword='+dis.search,{
             }).then(function(response){
+                dis.loadingPosts = false
                 dis.dbBlogPosts = response.data.data
                 for(let post of dis.dbBlogPosts)
                 {
@@ -264,10 +291,14 @@
                 dis.pages.push(i)
             }).catch(err => {
               console.log(err);
+              if(err.code == "ERR_NETWORK")
+              dis.networkError = true
             })
       },
       ChangePerPage()
       {
+        this.networkError = false
+        this.loadingPosts = true
         let dis = this
         if(this.perPage+1 >= this.totalCountOfPosts){
           this.page = 1
@@ -276,6 +307,7 @@
         axios.get('http://localhost:5000/api/blogposts?perPage='+dis.perPage+'&page='+dis.page+"&keyword="+dis.search,{
             }).then(function(response){
                 dis.dbBlogPosts = response.data.data
+                dis.loadingPosts = false
                 for(let post of dis.dbBlogPosts)
                 {
                   post.createdAt = post.createdAt.split("T")
@@ -286,6 +318,8 @@
                 dis.pages.push(i)
             }).catch(err => {
               console.log(err);
+              if(err.code == "ERR_NETWORK")
+              dis.networkError = true
             })
       },
       Vote(type,postId){
@@ -319,9 +353,6 @@
             }
             this.userDefendedPosts.push(postId)
           }
-          
-          console.log("Attacked posts:"+this.userAttackedPosts);
-          console.log("Defended posts:"+this.userDefendedPosts);
           var data = JSON.stringify({
             "voteType": type,
             "blogPostId": postId
@@ -336,10 +367,13 @@
           },
           data : data
         };
+        this.loadingPosts = true
+        this.networkError = false
         axios(config).then(function(response){
               // promeni stanje dugmeta 
               axios.get('http://localhost:5000/api/blogposts?perPage='+dis.perPage+'&page='+dis.page+"&keyword="+dis.search,{
             }).then(function(response){
+                dis.loadingPosts = false
                 dis.dbBlogPosts = response.data.data
                 for(let post of dis.dbBlogPosts)
                 {
@@ -349,9 +383,13 @@
                 
             }).catch(err => {
               console.log(err);
+              if(err.code == "ERR_NETWORK")
+                dis.networkError = true
             })
           }).catch(err => {
             console.log(err);
+            if(err.code == "ERR_NETWORK")
+            dis.networkError = true
           })
             }
             else{
@@ -369,14 +407,15 @@
       this.userAttackedPosts=[]
       this.userDefendedPosts=[]
       var dis = this
+      this.loadingPosts = true
       // prvo glasovi korisnika ako je ulogovan
       if(localStorage.getItem("token")){
           const config = {
               headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
           };
-        axios.get('http://localhost:5000/api/votes?perPage=99999',config) // BROJANJE KORISNIKOVIH GLASOVA
+        axios.get('http://localhost:5000/api/votes?perPage=99999',config) // brojanje glasova
              .then(function(response){
-              // console.log(response.data.data);
+              dis.loadingPosts = false
               for(let vote of response.data.data)
               {
                 if(vote.voteType == 1 && vote.blogPostId != null)
@@ -384,11 +423,8 @@
                 else if(vote.blogPostId != null)
                 dis.userDefendedPosts.push(vote.blogPostId)
               }
-              console.log(dis.userAttackedPosts);
-              console.log(dis.userDefendedPosts);
               })
             }
-      // ovo treba da bude inicijalno ucitavanje blogpost-ova, pa na klik linka iz paginacije da se poziva axios request za paginaciju
       axios.get('http://localhost:5000/api/blogposts?perPage='+dis.perPage+'&page='+dis.page,{
             }).then(function(response){
               dis.totalCountOfPosts = response.data.totalCount // TOTAL COUNT
@@ -404,6 +440,11 @@
                 }
             }).catch(err => {
               console.log(err);
+              if(err.code == "ERR_NETWORK")
+              {
+                dis.networkError = true
+                // potencijalno pokrenuti ovaj zahtev u rekurziji u intervalima dok se ne izadje iz catch bloka
+              }
             })
         
     }

@@ -83,7 +83,6 @@ export default {
       handleLogin(){
         let vm = this
         this.loading = true
-        console.log(this.password);
             axios.post('http://localhost:5000/api/token',{
                 email:this.email,
                 password:this.password
