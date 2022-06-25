@@ -43,12 +43,13 @@
                         <strong>{{ Math.ceil(post.health) }}<v-icon dark>mdi-hospital</v-icon></strong>
                     </v-progress-linear>
                     <v-card class="my-5 pa-2" flat>
-                        <router-link :to="{name:'Edit',path:'/edit/'+post.id,params:{id:post.id}}" style="text-decoration:none;color:grey">
+                        <!-- <router-link :to="{name:'Edit',path:'/edit/'+post.id,params:{id:post.id}}" style="text-decoration:none;color:grey">
                         <v-btn color="primary" >
                         <v-icon large left> mdi-note-edit </v-icon>
                         Edit
                         </v-btn>
-                        </router-link>
+                        </router-link> -->
+                        <EditPostPopup absolute :postId="post.id" :title="post.title" :blogPostContent="post.blogPostContent" :categoryValues="post.categories" @updateTitle="post.title"/>
                     </v-card>
                     <v-card class="my-5 pa-2" flat>
                         <DeletePopup absolute :postId="post.id" :title="post.title" />
@@ -65,13 +66,15 @@
 import Vuetify from 'vuetify'
 import axios from 'axios'
 import DeletePopup from '@/components/DeletePopup.vue'
+import EditPostPopup from '@/components/EditPostPopup.vue'
 export default {
-    components:{Vuetify, DeletePopup},
+    components:{Vuetify, DeletePopup, EditPostPopup},
     name:'YourPosts',
     data(){
         return {
             usersPosts:[],
-            deletePopupShow:false
+            deletePopupShow:false,
+            editPostPopupShow:false
         }
     },
     created(){
@@ -88,6 +91,7 @@ export default {
             //   for(let i = 1; i <= response.data.pagesCount; i++)
             //     dis.pages.push(i)  // broj stranica
                 dis.usersPosts = response.data.data
+                console.log(dis.usersPosts);
                 for(let post of dis.usersPosts)
                 {
                   post.createdAt = post.createdAt.split("T")

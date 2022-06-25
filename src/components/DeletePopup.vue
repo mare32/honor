@@ -67,7 +67,6 @@ export default {
                  .then(function(response){
                  vm.loading = false
                  window.location.reload()
-                 // pokusati da se ne reloaduje strana nekako?
             }).catch(function(err){
                vm.loading = false
                console.log(err);
