@@ -4,6 +4,7 @@ import Home from '../views/Home.vue'
 import YourPosts from '../views/YourPosts.vue'
 import Profile from '../views/Profile.vue'
 import Post from '../views/Post.vue'
+import Panel from '../views/Panel.vue'
 
 Vue.use(VueRouter)
 
@@ -28,6 +29,11 @@ const routes = [
     name:'Post',
     component: Post,
     props: true
+  },
+  {
+    path: '/admin',
+    name: 'Panel',
+    component: Panel
   },
 ]
 

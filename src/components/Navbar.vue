@@ -53,6 +53,19 @@
                 </v-list-item-content>
                 </v-list-item>
 
+
+                <v-list-item v-if="1"
+                router to="/admin"
+                >
+                <v-list-item-icon>
+                    <v-icon>mdi-shield-crown</v-icon>
+                </v-list-item-icon>
+
+                <v-list-item-content>
+                    <v-list-item-title>Panel</v-list-item-title>
+                </v-list-item-content>
+                </v-list-item>
+
             </v-list>
             <Popup v-if="logged"/>
             <LoginPopup v-if="!logged" class="my-3"/>
@@ -77,7 +90,8 @@ export default {
             ['mdi-home', 'Home','/']
             ],
             logged:false,
-            loading:false
+            loading:false,
+            admin:false
         }
     },
     created(){
