@@ -134,16 +134,13 @@ export default {
             firstname:'',
             username:'',
             lastname:'',
-            email: '',
-            token: ''
+            email: ''
         }
     },
     methods:{
         changeUsername(){
-            if(localStorage.getItem("token"))
-                this.token = localStorage.getItem("token")
             const config = {
-                headers: { Authorization: `Bearer ${this.token}` }
+                headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
             };
 
             const bodyParameters = {
@@ -158,10 +155,8 @@ export default {
             })
             },
         changeFirstname(){
-            if(localStorage.getItem("token"))
-                this.token = localStorage.getItem("token")
             const config = {
-                headers: { Authorization: `Bearer ${this.token}` }
+                headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
             };
 
             const bodyParameters = {
@@ -176,10 +171,8 @@ export default {
             })
             },
             changeLastname(){
-            if(localStorage.getItem("token"))
-                this.token = localStorage.getItem("token")
             const config = {
-                headers: { Authorization: `Bearer ${this.token}` }
+                headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
             };
 
             const bodyParameters = {
@@ -194,10 +187,8 @@ export default {
             })
             },
             changeEmail(){
-            if(localStorage.getItem("token"))
-                this.token = localStorage.getItem("token")
             const config = {
-                headers: { Authorization: `Bearer ${this.token}` }
+                headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
             };
 
             const bodyParameters = {
@@ -212,17 +203,18 @@ export default {
             })
             }
     },
+    created(){
+        if(!localStorage.getItem("token"))
+             window.location.href = "/"
+    },
     mounted(){
-        if(localStorage.getItem("token"))
-                this.token = localStorage.getItem("token")
             const config = {
-                headers: { Authorization: `Bearer ${this.token}` }
+                headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
             };
         const vm = this;
         axios.get('http://localhost:5000/api/profile',config)
              .then(function(response)
             {
-                console.log(response.data);
                 vm.username = response.data.username
                 vm.firstname = response.data.firstName
                 vm.email = response.data.email

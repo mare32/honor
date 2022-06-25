@@ -431,7 +431,6 @@
               for(let i = 1; i <= response.data.pagesCount; i++)
                 dis.pages.push(i)  // broj stranica
 
-
                 dis.dbBlogPosts = response.data.data
                 for(let post of dis.dbBlogPosts)
                 {

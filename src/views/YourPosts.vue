@@ -43,6 +43,10 @@ export default {
             ]
         }
     },
+    created(){
+        if(!localStorage.getItem("token"))
+             window.location.href = "/"
+    },
     computed:{
         myPosts(){
             return this.posts.filter(post => {

@@ -18,7 +18,7 @@ export default {
     //
   }),
   created(){
-    var hours = 1;
+    var hours = 8;
     var now = new Date().getTime();
     var setupTime = localStorage.getItem('setupTime');
     if (setupTime == null) {
