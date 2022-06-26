@@ -108,7 +108,6 @@ export default {
                 .then(function(response)
                 {
                     vm.loggedUser = response.data
-                    console.log(vm.loggedUser);
                 if(vm.loggedUser.role == "Admin")
                     vm.admin = true
                 else

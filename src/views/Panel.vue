@@ -12,10 +12,10 @@
             hide-default-footer
             disable-sort
             :headers="dessertHeaders"
-            :items="desserts"
+            :items="users"
             :single-expand="singleExpand"
             :expanded.sync="expanded"
-            item-key="name"
+            item-key="username"
             show-expand
             class="elevation-1"
         >
@@ -30,10 +30,89 @@
                 ></v-switch>
             </v-toolbar>
             </template>
-            <template v-slot:expanded-item="{ headers, item }">
-            <td :colspan="headers.length">
-                More info about {{ item.name }}
-            </td>
+            <template v-slot:expanded-item="{ item }">
+            <div v-if="item.blogPosts.length" class="pa-5">
+            <table class="bordered">
+              <thead>
+                <tr>
+                    <td class="userPostsTd">
+                      Id
+                    </td>
+                    <td class="userPostsTd">
+                      Title
+                    </td>
+                    <td class="userPostsTd">
+                      Health & Shield
+                    </td>
+                    <td class="userPostsTd">
+                      Status
+                    </td>
+                    <td class="userPostsTd">
+                      Hide
+                    </td>
+                    <td class="userPostsTd">
+                      Delete
+                    </td>
+                </tr>
+              </thead>
+              <tbody>
+              <tr v-for="post in item.blogPosts" :key="post.id">
+                <td class="userPostsTd">
+                  {{post.id}}
+                </td>
+                <td class="userPostsTd">
+                  <router-link :to="{name:'Post',path:'/post/'+post.id,params:{id:post.id}}">{{post.title}}</router-link> 
+                </td>
+                <td class="userPostsTd">
+                  <v-progress-linear
+                        v-if="post.shield > 0"
+                        :value="post.shield"
+                        height="20"
+                        color="blue"
+                        rounded
+                        class="my-2"
+                    >
+                        <strong>{{ Math.ceil(post.shield) }}<v-icon small>mdi-shield</v-icon></strong>
+                    </v-progress-linear>
+                    <v-progress-linear
+                        v-if="post.health < 50"
+                        :value="post.health"
+                        height="20"
+                        color="red"
+                        rounded
+                    >
+                        <strong>{{ Math.ceil(post.health) }}<v-icon>mdi-hospital</v-icon></strong>
+                    </v-progress-linear>
+                    <v-progress-linear
+                        v-else
+                        :value="post.health"
+                        height="20"
+                        color="green"
+                        rounded
+                    >
+                        <strong>{{ Math.ceil(post.health) }}<v-icon dark>mdi-hospital</v-icon></strong>
+                    </v-progress-linear>
+                </td>
+                <td class="userPostsTd">
+                  <v-chip small :class="`${post.status} white--text caption my-2`">{{post.status}}</v-chip> 
+                </td>
+                <td class="userPostsTd">
+                  <v-btn color="black" dark>
+                    <v-icon>mdi-eye-off</v-icon>
+                  </v-btn>
+                </td>
+                <td class="userPostsTd">
+                  <v-btn color="error" dark>
+                    <v-icon>mdi-delete</v-icon>
+                  </v-btn>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+            </div>
+            <div v-else class="pa-5">
+                User has no posts.
+            </div>
             </template>
         </v-data-table>
       </v-expansion-panel-content>
@@ -161,13 +240,12 @@
           {
             text: 'First name',
             align: 'start',
-            value: 'name',
+            value: 'firstName',
           },
-        //   { text: 'First name', value: 'calories' },
-          { text: 'Last name', value: 'fat' },
-          { text: 'Username', value: 'carbs' },
-          { text: 'Email', value: 'protein' },
-          { text: 'Role', value: 'iron' },
+          { text: 'Last name', value: 'lastName' },
+          { text: 'Username', value: 'username' },
+          { text: 'Email', value: 'email' },
+          { text: 'Role', value: 'role' },
           { text: '', value: 'data-table-expand' },
         ],
         desserts: [
@@ -275,7 +353,7 @@
              .then(function(response)
             {
                 vm.loggedUser = response.data
-                console.log(vm.loggedUser);
+                // console.log(vm.loggedUser);
             if(vm.loggedUser.role != "Admin")
                 setTimeout(function(){window.location.href = "/"},3000)
             else
@@ -285,12 +363,54 @@
             })
     },
     mounted(){
+            const config = {
+                headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+            };
+        const vm = this;
+        axios.get('http://localhost:5000/api/users',config)
+             .then(function(response)
+            {
+                vm.users = response.data.data
+                console.log(vm.users);
+            }).catch(err => {
+                console.log(err);
+            })
+
+
+        axios.get('http://localhost:5000/api/blogposts',config)
+             .then(function(response)
+            {
+                vm.posts = response.data.data
+                console.log(vm.posts)
+            }).catch(err => {
+                console.log(err);
+            })
             
+            axios.get('http://localhost:5000/api/categories',config)
+             .then(function(response)
+            {
+                vm.categories = response.data.data
+                console.log(vm.categories)
+            }).catch(err => {
+                console.log(err);
+            })
+
+        axios.get('http://localhost:5000/api/useCaseLogs?dateFrom=2022-06-26&dateTo=2022-06-27',config)
+             .then(function(response)
+            {
+                vm.logs = response
+                console.log(vm.logs)
+            }).catch(err => {
+                console.log(err);
+            })
     }
   }
 </script>
 <style>
-
+ .userPostsTd{
+  border-right:2px solid #000;
+  border-bottom:2px solid #000;
+ }
 </style>
 
 

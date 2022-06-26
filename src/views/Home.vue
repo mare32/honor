@@ -6,7 +6,7 @@
         <v-tooltip top small>
            <template v-slot:activator="{on, attrs}">
           <v-btn text color="grey" @click="sortBy('title')" v-on="on" v-bind="attrs">
-            <v-icon left small>mdi-folder</v-icon>
+            <v-icon left small>mdi-post </v-icon>
             <span class="caption text-lowercase">By Post Name</span>
           </v-btn>
           </template>
@@ -24,7 +24,7 @@
         <v-tooltip top small>
            <template v-slot:activator="{on, attrs}">
         <v-btn text color="grey" @click="sortBy('health')" v-on="on" v-bind="attrs">
-          <v-icon left small>mdi-water</v-icon>
+          <v-icon left small>mdi-hospital</v-icon>
           <span class="caption text-lowercase">By Health</span>
         </v-btn>
         </template>
@@ -103,7 +103,7 @@
             color="red"
             rounded
           >
-            <strong>{{ Math.ceil(post.health) }}<v-icon>mdi-water</v-icon></strong>
+            <strong>{{ Math.ceil(post.health) }}<v-icon>mdi-hospital</v-icon></strong>
           </v-progress-linear>
           <v-progress-linear
             v-else
@@ -112,7 +112,7 @@
             color="green"
             rounded
           >
-            <strong>{{ Math.ceil(post.health) }}<v-icon dark>mdi-water</v-icon></strong>
+            <strong>{{ Math.ceil(post.health) }}<v-icon dark>mdi-hospital</v-icon></strong>
           </v-progress-linear>
           <v-btn class="ma-5" fab :color="userDefendedPosts.includes(post.id) ? 'cyan' : ''" dark @click="Vote(2,post.id)">
             <v-icon large>mdi-shield-half-full</v-icon>
@@ -204,12 +204,12 @@
         if(prop === "health")
         {
           if(this.sortedHow === 'asc'){
-            this.dbBlogPosts.sort((a,b) => a[prop] < b[prop] ? -1 : 1)
+            this.dbBlogPosts.sort((a,b) => a[prop]+a['shield'] < b[prop]+b['shield'] ? -1 : 1)
             this.sortedHow = 'desc'
             this.sortedBy = 'health'
           }
           else{
-            this.dbBlogPosts.sort((a,b) => a[prop] > b[prop] ? -1 : 1)
+            this.dbBlogPosts.sort((a,b) => a[prop]+a['shield'] > b[prop]+b['shield'] ? -1 : 1)
             this.sortedHow = 'asc'
             this.sortedBy = 'health'
           }
@@ -466,6 +466,16 @@
   }
   .v-chip.Dead{
     background:rgb(0, 0, 0)!important;
+  }
+  .v-chip.Popular{
+    background:rgb(226, 255, 6)!important;
+    color: #000!important;
+  }
+  .v-chip.Invisible{
+    background:rgb(86, 86, 86)!important;
+  }
+  .v-chip.Amazing{
+    background:rgb(255, 0, 0)!important;
   }
   .ma{
     position:absolute;
