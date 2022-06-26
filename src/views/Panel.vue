@@ -98,7 +98,7 @@
                   <v-chip small :class="`${post.status} white--text caption my-2`">{{post.status}}</v-chip> 
                 </td>
                 <td>
-                  <v-btn color="black" dark>
+                  <v-btn color="black" :dark="post.status == 'Invisible' ? false : true" :disabled="post.status == 'Invisible' ? true : false" @click="hidePost(post.id)">
                     <v-icon>mdi-eye-off</v-icon>
                   </v-btn>
                 </td>
@@ -259,7 +259,7 @@
                 </td>
                 <td><v-chip small :class="`${post.status} white--text caption my-2`">{{post.status}}</v-chip> </td>
                 <td>
-                  <v-btn color="black" dark>
+                  <v-btn color="black" :dark="post.status == 'Invisible' ? false : true" :disabled="post.status == 'Invisible' ? true : false" @click="hidePost(post.id)">
                     <v-icon>mdi-eye-off</v-icon>
                   </v-btn>
                 </td>
@@ -565,6 +565,31 @@
                 console.log(err);
             })
         }
+      },
+      hidePost(postId)
+      {
+          var data = JSON.stringify({
+            "id":postId,
+            "statusId":2
+          });
+          const config = {
+                  method: 'patch',
+                  url: 'http://localhost:5000/api/blogposts',
+                  headers:{ 
+                    'Authorization': 'Bearer '+localStorage.getItem('token'),
+                    'Content-Type': 'application/json'
+                    },
+                  data:data
+              };
+          axios(config)
+               .then(function(response)
+              {
+                  alert('Objava je sakrivena')
+                  window.location.reload()
+              }).catch(err => {
+                  alert(err.response.data.message)
+                  console.log(err);
+              })
       }
     }
   }
