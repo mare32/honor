@@ -2,7 +2,7 @@
 <div class="your-posts">
     <p class="headline grey--text text-center">Your posts</p>
     <v-col>
-        <v-row >
+        <v-row v-if="usersPosts.length">
             <v-col cols="12" sm="6" md="4" lg="4" v-for="post in usersPosts" :key="post.id">
                 <v-card class="text-center ma-3 pa-5" >
                     <v-responsive class="pt-4">
@@ -54,6 +54,21 @@
                     <v-card class="my-5 pa-2" flat>
                         <DeletePopup absolute :postId="post.id" :title="post.title" />
                     </v-card>
+                </v-card>
+            </v-col>
+        </v-row>
+        <v-row v-else>
+            <v-col cols="12" sm="12" md="12" lg="12">
+                <v-card class="text-center ma-3 pa-5" >
+                    <v-responsive class="pt-4">
+                        <v-avatar size="100">
+                            <img src="/img/coffee.png" alt="avatar" />
+                        </v-avatar>
+                    </v-responsive>
+                    <v-card-text>
+                        <div class=" text-subtitle-1 ">You didn post anyting</div>
+                        <div class=" text-subtitle-2 ">You can add a new post by opening the <v-icon small>mdi-menu</v-icon>sidebar and clicking the "<v-icon small>mdi-book-plus</v-icon>New post" button :)</div>
+                    </v-card-text>
                 </v-card>
             </v-col>
         </v-row>
