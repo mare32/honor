@@ -117,6 +117,67 @@
             </div>
             </template>
         </v-data-table>
+        <v-simple-table>
+            <template v-slot:default>
+            <thead>
+                <tr>
+                <th class="text-left">
+                    User
+                </th>
+                <th class="text-left">
+                    Action
+                </th>
+                <th class="text-left" v-if="actionChangeRole">
+                    Role
+                </th>
+                <th class="text-left">
+                    Proccess
+                </th>
+                </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="tdNewCat">
+                  <v-select
+                    :items="userNames"
+                    label="Users"
+                    outlined
+                    class="selectInputs"
+                  ></v-select>
+                </td>
+                <td class="tdNewCat">
+                  <v-select
+                    :items="['Change role','Delete']"
+                    label="Actions"
+                    outlined
+                    v-model="selectedAction"
+                    class="selectInputs"
+                    @change="actionChange"
+                  ></v-select>
+                </td>
+                <td v-if="actionChangeRole" class="tdNewCat">
+                  <v-select
+                    :items="['Admin','Normal']"
+                    label="Roles"
+                    outlined
+                    class="selectInputs"
+                  ></v-select>
+                </td>
+                <td class="tdNewCat" v-show="actionChangeRole">
+                  <v-btn large color="primary">
+                    <v-icon>mdi-account-cog</v-icon>
+                  </v-btn>
+                </td>
+                <td class="tdNewCat" v-show="!actionChangeRole">
+                  <v-btn large color="error" dark>
+                    <v-icon>mdi-delete</v-icon>
+                  </v-btn>
+                </td>
+
+              </tr>
+            </tbody>
+            </template>
+        </v-simple-table>
       </v-expansion-panel-content>
     </v-expansion-panel>
 
@@ -353,7 +414,10 @@
         posts:[],
         categories:[],
         logs:[],
-        checkIfAdmin:true
+        checkIfAdmin:true,
+        actionChangeRole:false,
+        selectedAction:'Delete',
+        userNames:[]
       }
     },
     methods:{
@@ -387,6 +451,8 @@
              .then(function(response)
             {
                 vm.users = response.data.data
+                for(let un of vm.users)
+                  vm.userNames.push(un.id+"-"+un.username)
             }).catch(err => {
                 console.log(err);
             })
@@ -425,11 +491,28 @@
             }).catch(err => {
                 console.log(err);
             })
+    },
+    methods:{
+      actionChange()
+      {
+        if(this.selectedAction == "Delete")
+          this.actionChangeRole = false
+        else
+          this.actionChangeRole = true
+      },
+      changeUserRole()
+      {
+        
+      }
     }
   }
 </script>
 <style>
  .tdNewCat{
+  margin-top:2em !important;
+ }
+ .selectInputs{
+  margin-bottom:none !important;
   margin-top:2em !important;
  }
 </style>

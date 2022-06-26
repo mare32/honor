@@ -205,11 +205,14 @@ export default {
             userAttackedComments: [],
             userDefendedComments: [],
             userAttackedPost:false,
-            userDefendedPost:false
+            userDefendedPost:false,
+            waitForDataToLoad:true,
+            postId:0
         }
     },
     mounted()
     {
+      
         var config = null
         var dis = this
         if(localStorage.getItem('token')){
@@ -230,7 +233,8 @@ export default {
 
         axios(config)
         .then(function (response) {
-            dis.post = response.data
+          dis.postId = response.data.id
+          dis.post = response.data
         })
         .catch(function (error) {
         console.log(error);
@@ -256,12 +260,12 @@ export default {
           config.url = 'http://localhost:5000/api/votes?perPage=99999'
           axios(config) // BROJANJE KORISNIKOVIH GLASOVA
              .then(function(response){
-              // console.log(response.data.data);
+              console.log(response.data.data);
               for(let vote of response.data.data)
               {
-                if(vote.voteType == 1 && vote.blogPostId == dis.post.id)
+                if(vote.voteType == 1 && vote.blogPostId == dis.postId)
                   dis.userAttackedPost = true;
-                else if(vote.voteType == 2 && vote.blogPostId == dis.post.id)
+                else if(vote.voteType == 2 && vote.blogPostId == dis.postId)
                   dis.userDefendedPost = true;
                 if(vote.voteType == 1 && vote.commentId != null)
                 dis.userAttackedComments.push(vote.commentId)
@@ -289,7 +293,7 @@ export default {
                 else
                 dis.subcomments.push(comment)
               }
-            
+            // setTimeout(function(){this.waitForDataToLoad = false },1000)
               // console.log(dis.subcomments);
         })
         .catch(function (error) {
