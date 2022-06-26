@@ -142,6 +142,7 @@
                     :items="userNames"
                     label="Users"
                     outlined
+                    v-model="selectedUser"
                     class="selectInputs"
                   ></v-select>
                 </td>
@@ -157,14 +158,15 @@
                 </td>
                 <td v-if="actionChangeRole" class="tdNewCat">
                   <v-select
-                    :items="['Admin','Normal']"
+                    :items="['1-Admin','2-Normal']"
                     label="Roles"
                     outlined
+                    v-model="selectedRole"
                     class="selectInputs"
                   ></v-select>
                 </td>
                 <td class="tdNewCat" v-show="actionChangeRole">
-                  <v-btn large color="primary">
+                  <v-btn large color="primary" @click="changeUserRole">
                     <v-icon>mdi-account-cog</v-icon>
                   </v-btn>
                 </td>
@@ -417,6 +419,8 @@
         checkIfAdmin:true,
         actionChangeRole:false,
         selectedAction:'Delete',
+        selectedRole:'',
+        selectedUser:'',
         userNames:[]
       }
     },
@@ -502,7 +506,32 @@
       },
       changeUserRole()
       {
-        
+        let userTmp = this.selectedUser.split("-")
+        let userId = userTmp[0]
+        let roleTmp = this.selectedRole.split("-")
+        let roleId = roleTmp[0]
+        var data = JSON.stringify({
+          "roleId":roleId,
+              "userId":userId
+        });
+        const config = {
+                method: 'patch',
+                url: 'http://localhost:5000/api/admin',
+                headers:{ 
+                  'Authorization': 'Bearer '+localStorage.getItem('token'),
+                  'Content-Type': 'application/json'
+                  },
+                data:data
+            };
+        axios(config)
+             .then(function(response)
+            {
+                alert('Role successfuly changed')
+                window.location.reload()
+            }).catch(err => {
+                alert('Something went wrong')
+                console.log(err);
+            })
       }
     }
   }
