@@ -171,7 +171,7 @@
                   </v-btn>
                 </td>
                 <td class="tdNewCat" v-show="!actionChangeRole">
-                  <v-btn large color="error" dark>
+                  <v-btn large color="error" dark @click="deleteUser" :loading="loading">
                     <v-icon>mdi-delete</v-icon>
                   </v-btn>
                 </td>
@@ -421,7 +421,8 @@
         selectedAction:'Delete',
         selectedRole:'',
         selectedUser:'',
-        userNames:[]
+        userNames:[],
+        loading:false
       }
     },
     methods:{
@@ -451,10 +452,10 @@
                 headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
             };
         const vm = this;
-        axios.get('http://localhost:5000/api/users',config)
+        axios.get('http://localhost:5000/api/users?perPage=100',config)
              .then(function(response)
             {
-                vm.users = response.data.data
+              vm.users = response.data.data
                 for(let un of vm.users)
                   vm.userNames.push(un.id+"-"+un.username)
             }).catch(err => {
@@ -462,7 +463,7 @@
             })
 
 
-        axios.get('http://localhost:5000/api/blogposts',config)
+        axios.get('http://localhost:5000/api/blogposts?perPage=100',config)
              .then(function(response)
             {
                 vm.posts = response.data.data
@@ -470,7 +471,7 @@
                 console.log(err);
             })
             
-            axios.get('http://localhost:5000/api/categories',config)
+            axios.get('http://localhost:5000/api/categories?perPage=100',config)
              .then(function(response)
             {
                 vm.categories = response.data.data
@@ -506,32 +507,64 @@
       },
       changeUserRole()
       {
+        if(this.selectedUser == '')
+        alert("Please select a user")
+        else{
+          let userTmp = this.selectedUser.split("-")
+          let userId = userTmp[0]
+          let roleTmp = this.selectedRole.split("-")
+          let roleId = roleTmp[0]
+          var data = JSON.stringify({
+            "roleId":roleId,
+                "userId":userId
+          });
+          const config = {
+                  method: 'patch',
+                  url: 'http://localhost:5000/api/admin',
+                  headers:{ 
+                    'Authorization': 'Bearer '+localStorage.getItem('token'),
+                    'Content-Type': 'application/json'
+                    },
+                  data:data
+              };
+          axios(config)
+               .then(function(response)
+              {
+                  alert('Uloga promenjena')
+                  window.location.reload()
+              }).catch(err => {
+                  alert(err.response.data.message)
+                  console.log(err);
+              })
+        }
+      },
+      deleteUser()
+      {
+        if(this.selectedUser == '')
+        alert("Please select a user")
+        else{
         let userTmp = this.selectedUser.split("-")
         let userId = userTmp[0]
-        let roleTmp = this.selectedRole.split("-")
-        let roleId = roleTmp[0]
-        var data = JSON.stringify({
-          "roleId":roleId,
-              "userId":userId
-        });
+        let dis = this
         const config = {
-                method: 'patch',
-                url: 'http://localhost:5000/api/admin',
+                method: 'delete',
+                url: 'http://localhost:5000/api/users/'+userId,
                 headers:{ 
-                  'Authorization': 'Bearer '+localStorage.getItem('token'),
-                  'Content-Type': 'application/json'
-                  },
-                data:data
+                  'Authorization': 'Bearer '+localStorage.getItem('token')
+                  }
             };
+            this.loading = true
         axios(config)
-             .then(function(response)
+            .then(function(response)
             {
-                alert('Role successfuly changed')
+                alert('User deleted')
+                dis.loading = false
                 window.location.reload()
             }).catch(err => {
                 alert('Something went wrong')
                 console.log(err);
             })
+        }
       }
     }
   }

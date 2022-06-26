@@ -260,7 +260,7 @@ export default {
           config.url = 'http://localhost:5000/api/votes?perPage=99999'
           axios(config) // BROJANJE KORISNIKOVIH GLASOVA
              .then(function(response){
-              console.log(response.data.data);
+              // console.log(response.data.data);
               for(let vote of response.data.data)
               {
                 if(vote.voteType == 1 && vote.blogPostId == dis.postId)
