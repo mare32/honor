@@ -32,38 +32,39 @@
             </template>
             <template v-slot:expanded-item="{ item }">
             <div v-if="item.blogPosts.length" class="pa-5">
-            <table class="bordered">
+            <v-simple-table>
+            <template v-slot:default>
               <thead>
                 <tr>
-                    <td class="userPostsTd">
+                    <td>
                       Id
                     </td>
-                    <td class="userPostsTd">
+                    <td>
                       Title
                     </td>
-                    <td class="userPostsTd">
+                    <td>
                       Health & Shield
                     </td>
-                    <td class="userPostsTd">
+                    <td>
                       Status
                     </td>
-                    <td class="userPostsTd">
+                    <td>
                       Hide
                     </td>
-                    <td class="userPostsTd">
+                    <td>
                       Delete
                     </td>
                 </tr>
               </thead>
               <tbody>
               <tr v-for="post in item.blogPosts" :key="post.id">
-                <td class="userPostsTd">
+                <td>
                   {{post.id}}
                 </td>
-                <td class="userPostsTd">
+                <td>
                   <router-link :to="{name:'Post',path:'/post/'+post.id,params:{id:post.id}}">{{post.title}}</router-link> 
                 </td>
-                <td class="userPostsTd">
+                <td>
                   <v-progress-linear
                         v-if="post.shield > 0"
                         :value="post.shield"
@@ -93,22 +94,23 @@
                         <strong>{{ Math.ceil(post.health) }}<v-icon dark>mdi-hospital</v-icon></strong>
                     </v-progress-linear>
                 </td>
-                <td class="userPostsTd">
+                <td>
                   <v-chip small :class="`${post.status} white--text caption my-2`">{{post.status}}</v-chip> 
                 </td>
-                <td class="userPostsTd">
+                <td>
                   <v-btn color="black" dark>
                     <v-icon>mdi-eye-off</v-icon>
                   </v-btn>
                 </td>
-                <td class="userPostsTd">
+                <td>
                   <v-btn color="error" dark>
                     <v-icon>mdi-delete</v-icon>
                   </v-btn>
                 </td>
               </tr>
               </tbody>
-            </table>
+            </template>
+        </v-simple-table>
             </div>
             <div v-else class="pa-5">
                 User has no posts.
@@ -127,21 +129,82 @@
             <template v-slot:default>
             <thead>
                 <tr>
-                <th class="text-left">
-                    Name
-                </th>
-                <th class="text-left">
-                    Calories
-                </th>
+                  <th class="text-left">
+                      Id
+                  </th>
+                  <th class="text-left">
+                      Title
+                  </th>
+                  <th class="text-left">
+                      Author Username
+                  </th>
+                  <th class="text-left">
+                      Author Email
+                  </th>
+                  <th class="text-left">
+                      Health & Shield
+                  </th>
+                  <th class="text-left">
+                      Status
+                  </th>
+                  <th class="text-left">
+                      Hide
+                  </th>
+                  <th class="text-left">
+                      Delete
+                  </th>
                 </tr>
             </thead>
             <tbody>
                 <tr
-                v-for="item in desserts"
-                :key="item.name"
+                v-for="post in posts"
+                :key="post.id"
                 >
-                <td>{{ item.name }}</td>
-                <td>{{ item.calories }}</td>
+                <td>{{ post.id }}</td>
+                <td><router-link :to="{name:'Post',path:'/post/'+post.id,params:{id:post.id}}">{{post.title}}</router-link> </td>
+                <td>{{ post.author.username }}</td>
+                <td>{{ post.author.email }}</td>
+                <td>
+                  <v-progress-linear
+                        v-if="post.shield > 0"
+                        :value="post.shield"
+                        height="20"
+                        color="blue"
+                        rounded
+                        class="my-2"
+                    >
+                        <strong>{{ Math.ceil(post.shield) }}<v-icon small>mdi-shield</v-icon></strong>
+                    </v-progress-linear>
+                    <v-progress-linear
+                        v-if="post.health < 50"
+                        :value="post.health"
+                        height="20"
+                        color="red"
+                        rounded
+                    >
+                        <strong>{{ Math.ceil(post.health) }}<v-icon>mdi-hospital</v-icon></strong>
+                    </v-progress-linear>
+                    <v-progress-linear
+                        v-else
+                        :value="post.health"
+                        height="20"
+                        color="green"
+                        rounded
+                    >
+                        <strong>{{ Math.ceil(post.health) }}<v-icon dark>mdi-hospital</v-icon></strong>
+                    </v-progress-linear>
+                </td>
+                <td><v-chip small :class="`${post.status} white--text caption my-2`">{{post.status}}</v-chip> </td>
+                <td>
+                  <v-btn color="black" dark>
+                    <v-icon>mdi-eye-off</v-icon>
+                  </v-btn>
+                </td>
+                <td>
+                  <v-btn color="error" dark>
+                    <v-icon>mdi-delete</v-icon>
+                  </v-btn>
+                </td>
                 </tr>
             </tbody>
             </template>
@@ -160,21 +223,40 @@
             <thead>
                 <tr>
                 <th class="text-left">
+                    Id
+                </th>
+                <th class="text-left">
                     Name
                 </th>
                 <th class="text-left">
-                    Calories
+                    Remove
                 </th>
                 </tr>
             </thead>
             <tbody>
                 <tr
-                v-for="item in desserts"
-                :key="item.name"
+                v-for="item in categories"
+                :key="item.id"
                 >
+                <td>{{ item.id }}</td>
                 <td>{{ item.name }}</td>
-                <td>{{ item.calories }}</td>
+                <td>
+                  <v-btn color="error">
+                    <v-icon>mdi-delete</v-icon>
+                  </v-btn>
+                </td>
                 </tr>
+                <tr>
+                <td class="tdNewCat">
+                  <v-text-field
+                  solo
+                  label="New category"
+                  dense
+                  class="mt-5"
+                  ></v-text-field>
+                </td>
+                <td colspan="2"><v-btn>Add</v-btn></td>
+              </tr>
             </tbody>
             </template>
         </v-simple-table>
@@ -187,28 +269,47 @@
         Logs
       </v-expansion-panel-header>
       <v-expansion-panel-content>
-        <v-simple-table>
-            <template v-slot:default>
+        <v-simple-table
+          fixed-header
+          height="300px"
+        >
+          <template v-slot:default>
             <thead>
-                <tr>
+              <tr>
                 <th class="text-left">
-                    Name
+                  UseCase Name
                 </th>
                 <th class="text-left">
-                    Calories
+                  Username
                 </th>
-                </tr>
+                <th class="text-left">
+                  User id
+                </th>
+                <th class="text-left">
+                  Executed at
+                </th>
+                <th class="text-left">
+                  Data
+                </th>
+                <th class="text-left">
+                  Is authorized
+                </th>
+              </tr>
             </thead>
             <tbody>
-                <tr
-                v-for="item in desserts"
-                :key="item.name"
-                >
-                <td>{{ item.name }}</td>
-                <td>{{ item.calories }}</td>
-                </tr>
+              <tr
+                v-for="log in logs"
+                :key="log.id"
+              >
+                <td>{{ log.useCaseName }}</td>
+                <td>{{ log.username }}</td>
+                <td>{{ log.userId }}</td>
+                <td>{{ log.executedAt }}</td>
+                <td>{{ log.data }}</td>
+                <td>{{ log.isAuthorized }}</td>
+              </tr>
             </tbody>
-            </template>
+          </template>
         </v-simple-table>
       </v-expansion-panel-content>
     </v-expansion-panel>
@@ -371,7 +472,7 @@
              .then(function(response)
             {
                 vm.users = response.data.data
-                console.log(vm.users);
+                // console.log(vm.users);
             }).catch(err => {
                 console.log(err);
             })
@@ -381,7 +482,7 @@
              .then(function(response)
             {
                 vm.posts = response.data.data
-                console.log(vm.posts)
+                // console.log(vm.posts)
             }).catch(err => {
                 console.log(err);
             })
@@ -390,16 +491,24 @@
              .then(function(response)
             {
                 vm.categories = response.data.data
-                console.log(vm.categories)
+                // console.log(vm.categories)
             }).catch(err => {
                 console.log(err);
             })
-
+          let td = new Date().toISOString().slice(0, 10)
         axios.get('http://localhost:5000/api/useCaseLogs?dateFrom=2022-06-26&dateTo=2022-06-27',config)
              .then(function(response)
             {
-                vm.logs = response
-                console.log(vm.logs)
+              let tmpVal;
+              let tmpVal2;
+              for(let log of response.data)
+              {
+                  tmpVal = log.executedAt.split("T")
+                  tmpVal2 = tmpVal[1].split(".")
+                  log.executedAt = tmpVal[0]+ " | " +tmpVal2[0]
+                vm.logs.push(log)
+              }
+                
             }).catch(err => {
                 console.log(err);
             })
@@ -407,9 +516,8 @@
   }
 </script>
 <style>
- .userPostsTd{
-  border-right:2px solid #000;
-  border-bottom:2px solid #000;
+ .tdNewCat{
+  margin-top:2em !important;
  }
 </style>
 
