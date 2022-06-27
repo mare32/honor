@@ -103,7 +103,7 @@
                   </v-btn>
                 </td>
                 <td>
-                  <v-btn color="error" dark>
+                  <v-btn color="error" dark @click="deletePost(post.id)">
                     <v-icon>mdi-delete</v-icon>
                   </v-btn>
                 </td>
@@ -171,7 +171,7 @@
                   </v-btn>
                 </td>
                 <td class="tdNewCat" v-show="!actionChangeRole">
-                  <v-btn large color="error" dark @click="deleteUser" :loading="loading">
+                  <v-btn large color="error" dark @click="deleteUser" >
                     <v-icon>mdi-delete</v-icon>
                   </v-btn>
                 </td>
@@ -264,7 +264,7 @@
                   </v-btn>
                 </td>
                 <td>
-                  <v-btn color="error" dark>
+                  <v-btn color="error" dark  @click="deletePost(post.id)">
                     <v-icon>mdi-delete</v-icon>
                   </v-btn>
                 </td>
@@ -421,8 +421,7 @@
         selectedAction:'Delete',
         selectedRole:'',
         selectedUser:'',
-        userNames:[],
-        loading:false
+        userNames:[]
       }
     },
     methods:{
@@ -565,6 +564,28 @@
                 console.log(err);
             })
         }
+      },
+      deletePost(postId)
+      {
+        let dis = this
+        const config = {
+                method: 'delete',
+                url: 'http://localhost:5000/api/blogposts/'+postId,
+                headers:{ 
+                  'Authorization': 'Bearer '+localStorage.getItem('token')
+                  }
+            };
+            this.loading = true
+        axios(config)
+            .then(function(response)
+            {
+                alert('Objava obrisana')
+                dis.loading = false
+                window.location.reload()
+            }).catch(err => {
+                alert('Nesto je krenulo po zlu')
+                console.log(err);
+            })
       },
       hidePost(postId)
       {
