@@ -560,7 +560,7 @@
         axios(config)
             .then(function(response)
             {
-                alert('User deleted')
+                alert('Korisnik je obrisan')
                 dis.loading = false
                 window.location.reload()
             }).catch(err => {

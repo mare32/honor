@@ -263,7 +263,7 @@
         let dis = this
         this.loadingPosts = true
         this.networkError = false
-        axios.get('http://localhost:5000/api/blogposts?perPage='+dis.perPage+'&page='+page+"&keyword="+dis.search,{
+        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page='+page+"&keyword="+dis.search,{
             }).then(function(response){
                 dis.dbBlogPosts = response.data.data
                 for(let post of dis.dbBlogPosts)
@@ -282,7 +282,7 @@
         let dis = this
         this.loadingPosts = true
         this.networkError = false
-        axios.get('http://localhost:5000/api/blogposts?perPage='+dis.perPage+'&page=1&keyword='+dis.search,{
+        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page=1&keyword='+dis.search,{
             }).then(function(response){
                 dis.loadingPosts = false
                 dis.dbBlogPosts = response.data.data
@@ -309,7 +309,7 @@
           this.page = 1
         this.activePage = 1
         }
-        axios.get('http://localhost:5000/api/blogposts?perPage='+dis.perPage+'&page='+dis.page+"&keyword="+dis.search,{
+        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page='+dis.page+"&keyword="+dis.search,{
             }).then(function(response){
                 dis.dbBlogPosts = response.data.data
                 dis.loadingPosts = false
@@ -376,7 +376,7 @@
         this.networkError = false
         axios(config).then(function(response){
               // promeni stanje dugmeta 
-              axios.get('http://localhost:5000/api/blogposts?perPage='+dis.perPage+'&page='+dis.page+"&keyword="+dis.search,{
+              axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page='+dis.page+"&keyword="+dis.search,{
             }).then(function(response){
                 dis.loadingPosts = false
                 dis.dbBlogPosts = response.data.data
@@ -430,9 +430,10 @@
               }
               })
             }
-      axios.get('http://localhost:5000/api/blogposts?perPage='+dis.perPage+'&page='+dis.page,{
+      axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page='+dis.page,{
             }).then(function(response){
               dis.totalCountOfPosts = response.data.totalCount // TOTAL COUNT
+              // console.log(response.data.data)
               for(let i = 1; i <= response.data.pagesCount; i++)
                 dis.pages.push(i)  // broj stranica
 

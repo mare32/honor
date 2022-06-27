@@ -54,6 +54,12 @@
                     <v-card class="my-5 pa-2" flat>
                         <DeletePopup absolute :postId="post.id" :title="post.title" />
                     </v-card>
+                    <v-card class="my-5 pa-2" flat>
+                        <v-btn :dark="post.status == 'Invisible' ? false : true" :color="post.status == 'Invisible' ? 'white' : 'black'" @click="hideOrUnhidePost(post.id,post.status)">
+                            <v-icon v-if="post.status != 'Invisible'">mdi-eye-off</v-icon>
+                            <v-icon v-else>mdi-eye</v-icon>
+                        </v-btn>
+                    </v-card>
                 </v-card>
             </v-col>
         </v-row>
@@ -122,9 +128,47 @@ export default {
             })
     },
     methods:{
-        // ShowDeletePopup(){
-        //     this.deletePopupShow = true
-        // }
+        hideOrUnhidePost(postId,status)
+      {
+        let unhideStatusId = 0
+        let hideStatusId = 2
+        if(status == "Invisible")
+        {
+            var data = JSON.stringify({
+              "id":postId,
+              "statusId":unhideStatusId
+            });
+        }
+        else
+        {
+            var data = JSON.stringify({
+              "id":postId,
+              "statusId":hideStatusId
+            });
+        }
+          const config = {
+                  method: 'patch',
+                  url: 'http://localhost:5000/api/blogposts',
+                  headers:{ 
+                    'Authorization': 'Bearer '+localStorage.getItem('token'),
+                    'Content-Type': 'application/json'
+                    },
+                  data:data
+              };
+          axios(config)
+               .then(function(response)
+              {
+                if(status != "Invisible")
+                  alert('Objava je sakrivena')
+                else
+                  alert('Objava je ponovo vidljiva')
+
+                  window.location.reload()
+              }).catch(err => {
+                  alert(err.response.data.message)
+                  console.log(err);
+              })
+      },
     }
 }
 </script>

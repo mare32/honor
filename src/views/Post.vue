@@ -239,6 +239,22 @@ export default {
         axios(config)
         .then(function (response) {
           dis.postId = response.data.id
+          config.url = 'http://localhost:5000/api/votes?perPage=99999'
+          axios(config) // BROJANJE KORISNIKOVIH GLASOVA
+             .then(function(response){
+              // console.log(response.data.data);
+              for(let vote of response.data.data)
+              {
+                if(vote.voteType == 1 && vote.blogPostId == dis.postId)
+                  dis.userAttackedPost = true;
+                else if(vote.voteType == 2 && vote.blogPostId == dis.postId)
+                  dis.userDefendedPost = true;
+                if(vote.voteType == 1 && vote.commentId != null)
+                dis.userAttackedComments.push(vote.commentId)
+                else if(vote.commentId != null)
+                dis.userDefendedComments.push(vote.commentId)
+              }
+              })
           dis.post = response.data
         })
         .catch(function (error) {
@@ -262,22 +278,7 @@ export default {
           });
           
 
-          config.url = 'http://localhost:5000/api/votes?perPage=99999'
-          axios(config) // BROJANJE KORISNIKOVIH GLASOVA
-             .then(function(response){
-              // console.log(response.data.data);
-              for(let vote of response.data.data)
-              {
-                if(vote.voteType == 1 && vote.blogPostId == dis.postId)
-                  dis.userAttackedPost = true;
-                else if(vote.voteType == 2 && vote.blogPostId == dis.postId)
-                  dis.userDefendedPost = true;
-                if(vote.voteType == 1 && vote.commentId != null)
-                dis.userAttackedComments.push(vote.commentId)
-                else if(vote.commentId != null)
-                dis.userDefendedComments.push(vote.commentId)
-              }
-              })
+          
             }
         
 

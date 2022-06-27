@@ -13,8 +13,43 @@
             </v-btn>
         </v-app-bar>
         <v-navigation-drawer app absolute temporary v-model="drawer" class="teal">
+
+            <v-list v-if="logged">
+                <v-list-item class="px-5">
+                    <v-list-item-avatar>
+                        <v-img src="/img/user.png"></v-img>
+                    </v-list-item-avatar>
+                </v-list-item>
+
+                <v-list-item to="/profile">
+                    <v-list-item-content>
+                    <v-list-item-title class="text-h6 white--text">
+                        {{firstName}} {{lastName}}
+                    </v-list-item-title>
+                    <v-list-item-subtitle class="white--text">{{email}}</v-list-item-subtitle>
+                    </v-list-item-content>
+                </v-list-item>
+            </v-list>
+            
+            <v-list v-else>
+                <!-- <v-list-item class="px-2">
+                    <v-list-item-avatar>
+                    <v-img src="https://randomuser.me/api/portraits/women/85.jpg"></v-img>
+                    </v-list-item-avatar>
+                </v-list-item> -->
+
+                <v-list-item link>
+                    <v-list-item-content>
+                        <v-list-item-title class="text-h6 white--text">
+                            Anonymous
+                        </v-list-item-title>
+                    </v-list-item-content>
+                </v-list-item>
+            </v-list>
+
+            <v-divider></v-divider>
+
             <v-list dark class="pb-5">
-                
                 <v-list-item
                 v-for="([icon, text,route]) in items"
                 :key="text"
@@ -92,7 +127,11 @@ export default {
             ],
             logged:false,
             loading:false,
-            admin:false
+            admin:false,
+            username:'',
+            email:'',
+            firstName:'',
+            lastName:''
         }
     },
     created(){
@@ -108,6 +147,10 @@ export default {
                 .then(function(response)
                 {
                     vm.loggedUser = response.data
+                    vm.username = vm.loggedUser.username
+                    vm.email = vm.loggedUser.email
+                    vm.firstName = vm.loggedUser.firstName
+                    vm.lastName = vm.loggedUser.lastName
                 if(vm.loggedUser.role == "Admin")
                     vm.admin = true
                 else
