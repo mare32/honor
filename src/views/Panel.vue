@@ -301,13 +301,13 @@
                 v-for="item in categories"
                 :key="item.id"
                 >
-                <td>{{ item.id }}</td>
-                <td>{{ item.name }}</td>
-                <td>
-                  <v-btn color="error">
-                    <v-icon>mdi-delete</v-icon>
-                  </v-btn>
-                </td>
+                  <td>{{ item.id }}</td>
+                  <td>{{ item.name }}</td>
+                  <td>
+                    <v-btn color="error" @click="deleteCategory(item.id)">
+                      <v-icon>mdi-delete</v-icon>
+                    </v-btn>
+                  </td>
                 </tr>
                 <tr>
                 <td class="tdNewCat">
@@ -316,9 +316,12 @@
                   label="New category"
                   dense
                   class="mt-5"
+                  v-model="newCategoryName"
                   ></v-text-field>
                 </td>
-                <td colspan="2"><v-btn>Add</v-btn></td>
+                <td colspan="2">
+                  <v-btn color="primary" @click="addCategory">Add</v-btn>
+                </td>
               </tr>
             </tbody>
             </template>
@@ -421,7 +424,8 @@
         selectedAction:'Delete',
         selectedRole:'',
         selectedUser:'',
-        userNames:[]
+        userNames:[],
+        newCategoryName:''
       }
     },
     methods:{
@@ -611,6 +615,32 @@
                   alert(err.response.data.message)
                   console.log(err);
               })
+      },
+      addCategory()
+      {
+        console.log(this.newCategoryName)
+      },
+      deleteCategory(catId)
+      {
+        let dis = this
+        const config = {
+                method: 'delete',
+                url: 'http://localhost:5000/api/categories/'+catId,
+                headers:{ 
+                  'Authorization': 'Bearer '+localStorage.getItem('token')
+                  }
+            };
+            this.loading = true
+        axios(config)
+            .then(function(response)
+            {
+                alert('Kategorija obrisana')
+                dis.loading = false
+                window.location.reload()
+            }).catch(err => {
+                alert('Kategorija je vec vezana za neke objave, brisanje je otkazano.')
+                console.log(err);
+            })
       }
     }
   }

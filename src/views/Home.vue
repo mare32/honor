@@ -74,13 +74,18 @@
             <div>{{post.createdAt}}</div>
           </v-col >
           <v-col xs="2">
+            <div class="caption grey--text">Categories</div>
+            <v-chip small :class="`caption my-2`" v-for="category in post.categories" :key="category.id">{{category.name}}</v-chip>
+          </v-col >
+          <v-col xs="2">
             <div class="text-right">
+              <div class="caption grey--text">Status</div>
               <v-chip small :class="`${post.status} white--text caption my-2`">{{post.status}}</v-chip>
             </div>
           </v-col >
         </v-row>
         <v-row row wrap :class="`pa-12`">
-          {{post.content}}
+          {{post.blogPostContent}}
         </v-row>
         <v-row row wrap justify="space-around" :class="`pa-12`">
         <v-btn class="ma-5" fab :color="userAttackedPosts.includes(post.id) ? 'red' : ''" dark @click="Vote(1,post.id)">
