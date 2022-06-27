@@ -618,7 +618,34 @@
       },
       addCategory()
       {
-        console.log(this.newCategoryName)
+        if(this.newCategoryName == '')
+        {
+          //klijentska validacija
+          alert("Niste uneli ime kategorije")
+        }else{
+          let newName = this.newCategoryName
+           var data = JSON.stringify({
+              "name":newName
+            });
+            const config = {
+                    method: 'post',
+                    url: 'http://localhost:5000/api/categories',
+                    headers:{ 
+                      'Authorization': 'Bearer '+localStorage.getItem('token'),
+                      'Content-Type': 'application/json'
+                      },
+                    data:data
+                };
+            axios(config)
+                 .then(function(response)
+                {
+                    alert('Kategorija je dodata')
+                    window.location.reload()
+                }).catch(err => {
+                    alert(err.response.data.message)
+                    console.log(err);
+                })
+        }
       },
       deleteCategory(catId)
       {
