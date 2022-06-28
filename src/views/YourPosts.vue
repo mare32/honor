@@ -7,7 +7,7 @@
                 <v-card class="text-center ma-3 pa-5" >
                     <v-responsive class="pt-4">
                         <v-avatar size="100">
-                            <img src="/img/avatar.jpg" alt="avatar" />
+                            <img :src="post.image.src" :alt="post.image.alt" />
                         </v-avatar>
                     </v-responsive>
                     <v-card-text>

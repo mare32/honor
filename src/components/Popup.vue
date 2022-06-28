@@ -126,9 +126,25 @@ export default {
         title:'',
         content:'',
         imgAlt:'',
-        categories:['Skiing', 'Ice hockey', 'Soccer', 'Basketball', 'Hockey', 'Reading', 'Writing', 'Coding', 'Basejump'],
+        categories:[],
         categoryValues: []
     }),
+    mounted(){
+      // get categories
+      let dis = this
+      const config = {
+                headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+            };
+      axios.get('http://localhost:5000/api/categories?perPage=100',config)
+             .then(function(response)
+            {
+                for(let category of response.data.data)
+                dis.categories.push(category.id+"-"+category.name)
+                
+            }).catch(err => {
+                console.log(err);
+            })
+    },
     methods:{
       uploadImage(event){
         let data = new FormData();
