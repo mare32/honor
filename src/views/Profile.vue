@@ -206,6 +206,7 @@ export default {
     created(){
         if(!localStorage.getItem("token"))
              window.location.href = "/"
+        document.title = "Blograd | Profile"
     },
     mounted(){
             const config = {

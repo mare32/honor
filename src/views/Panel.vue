@@ -434,6 +434,7 @@
     created(){
         if(!localStorage.getItem("token"))
              setTimeout(function(){window.location.href = "/"},3000)
+        document.title = "Blograd | Admin Panel"
         const config = {
                 headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
             };

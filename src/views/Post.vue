@@ -215,6 +215,9 @@ export default {
             postId:0
         }
     },
+    created(){
+      document.title = "Blograd | Post"
+    },
     mounted()
     {
       

@@ -408,6 +408,9 @@
       },
       
     },
+    created(){
+    document.title = "Blograd | Home"
+    },
     mounted(){
       this.userAttackedPosts=[]
       this.userDefendedPosts=[]

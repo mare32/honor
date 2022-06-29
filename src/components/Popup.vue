@@ -27,6 +27,7 @@
                   solo
                   label="Title*"
                   required
+                  v-model="title"
                 ></v-text-field>
               </v-col>
               <v-col cols="12">
@@ -34,6 +35,7 @@
                 solo
                 name="input-7-4"
                 label="Content*"
+                v-model="content"
                 ></v-textarea>
               </v-col>
               <v-col
@@ -41,33 +43,11 @@
                 sm="12"
               >
                 <v-autocomplete
-                  :items="['Skiing', 'Ice hockey', 'Soccer', 'Basketball', 'Hockey', 'Reading', 'Writing', 'Coding', 'Basejump']"
+                  :items="categories"
                   label="Categories*"
                   multiple
+                  v-model='categoryValues'
                 ></v-autocomplete>
-                <v-col
-                  cols="12"
-                  sm="6"
-                >
-                  <v-select
-                    v-model="categoryValues"
-                    :items="categories"
-                    label="Select Categories"
-                    multiple
-                  >
-                    <template v-slot:selection="{ item, index }">
-                      <v-chip v-if="index === 0">
-                        <span>{{ item }}</span>
-                      </v-chip>
-                      <span
-                        v-if="index === 1"
-                        class="grey--text text-caption"
-                      >
-                        (+{{ categoryValues.length - 1 }} others)
-                      </span>
-                    </template>
-                  </v-select>
-                </v-col>
               </v-col>
               <v-col
                 cols="12"
@@ -76,15 +56,15 @@
               <v-file-input
                 label="Add image*"
                 prepend-icon="mdi-camera"
-                accept="image/*"
+                accept="*"
                 v-model="image"
-                @change="uploadImage($event)"
               ></v-file-input>
               </v-col>
               <v-col cols="12">
                 <v-text-field
                   solo
                   label="Image alt"
+                  v-model="imgAlt"
                 ></v-text-field>
               </v-col>
             </v-row>
@@ -92,7 +72,6 @@
           <small>*indicates required field</small>
         </v-card-text>
         <v-card-actions>
-          <!-- <v-spacer></v-spacer> -->
           <v-btn
             color="red darken-1"
             text
@@ -101,10 +80,20 @@
             Close
           </v-btn>
           <v-spacer></v-spacer>
+        <v-alert type="success" v-if="alert">
+         Post successfuly added!
+        </v-alert>
+        <v-alert type="error" v-if="alertError">
+         <span v-for="error in errors" :key="error">
+          {{error}}<br/>
+         </span>
+        </v-alert>
+        <v-spacer></v-spacer>
           <v-btn
             color="green darken-1"
             text
-            @click="dialog = false"
+            @click="addPost"
+            :loading="loading"
           >
             Add
           </v-btn>
@@ -127,7 +116,11 @@ export default {
         content:'',
         imgAlt:'',
         categories:[],
-        categoryValues: []
+        categoryValues: [],
+        loading:false,
+        alert:false,
+        alertError:false,
+        errors:[]
     }),
     mounted(){
       // get categories
@@ -146,26 +139,29 @@ export default {
             })
     },
     methods:{
-      uploadImage(event){
-        let data = new FormData();
-        data.append('name', this.image);
-        // data.append('file', event.target.files[0]); 
-        console.log(this.image)
-        let config = {
-          header : {
-            'Content-Type' : 'image/png'
-          }
-        }
-        // axios.post('http://localhost:5000/blogposts')
-      },
-      postmanGeneratedAxios(){
+      // uploadImage(event){
+      //   // this.image = event
+      //   console.log(this.image)
+      //   // this.image = event.target.files[0]
+      //   // console.log(this.image.name)
+      //   // axios.post('http://localhost:5000/blogposts')
+      // },
+      addPost(event){
+        let tmp;
+        let dis = this
         var data = new FormData();
+        console.log(event)
         // data.append('Image', fs.createReadStream('/C:/Users/Gaming/Pictures/Uncategorized/chill-06.jpg'));
         data.append('Title', this.title);
+        console.log(this.image);
+        data.append('image',this.image); 
         data.append('BlogPostContent', this.content);
         // foreach categoryValues - kako uzeti samo value a ne naziv, mozda dodati id u naziv i uraditi split? - jedno resenje
-        data.append('categoryIds', '3');
-        data.append('categoryIds', '2');
+        for(let catId of this.categoryValues)
+        {
+          tmp = catId.split("-")
+          data.append('categoryIds', tmp[0]);
+        }
         // endforeach
         data.append('imageAlt', this.imgAlt);
 
@@ -173,17 +169,18 @@ export default {
           method: 'post',
           url: 'http://localhost:5000/api/blogposts',
           headers: { 
-            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIyNmNjODQ3Mi0wMzZjLTQyMmYtODZiMi1kOGQ0MDQ1OGQ5NmMiLCJpc3MiOiJibG9nX2FkbWluIiwiaWF0IjoxNjU0NTg4NDIwLCJVc2VySWQiOiIxMDAyIiwiVXNlQ2FzZXMiOiJbMjAwNSwyMDEyLDIwMTRdIiwiRW1haWwiOiJ0b21hQGdtYWlsLmNvbSIsIm5iZiI6MTY1NDU4ODQyMCwiZXhwIjoxNjU0NTk1NjIwLCJhdWQiOiJBbnkifQ.fo4G7RZrnoDqzwvWgxJlhFm8-OmF6Rl2BTg0lTjxfu0', 
-            ...data.getHeaders()
+            'Authorization': 'Bearer '+localStorage.getItem('token')
           },
           data : data
         };
 
         axios(config)
         .then(function (response) {
-          console.log(JSON.stringify(response.data));
+          dis.alert = true;
+          dis.loading = false
         })
         .catch(function (error) {
+          console.log("not nice")
           console.log(error);
         });
       }
