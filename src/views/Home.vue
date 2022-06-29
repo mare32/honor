@@ -101,7 +101,7 @@
           >
             <strong>{{ Math.ceil(post.shield) }}<v-icon small>mdi-shield</v-icon></strong>
           </v-progress-linear>
-          <v-progress-linear
+          <!-- <v-progress-linear
             v-if="post.health < 50"
             v-model="post.health"
             height="20"
@@ -109,15 +109,14 @@
             rounded
           >
             <strong>{{ Math.ceil(post.health) }}<v-icon>mdi-hospital</v-icon></strong>
-          </v-progress-linear>
+          </v-progress-linear> -->
           <v-progress-linear
-            v-else
             v-model="post.health"
             height="20"
-            color="green"
+            :color="getHealthBarColor(post.health)"
             rounded
           >
-            <strong>{{ Math.ceil(post.health) }}<v-icon dark>mdi-hospital</v-icon></strong>
+            <strong>{{ Math.ceil(post.health) }}<v-icon>mdi-hospital</v-icon></strong>
           </v-progress-linear>
           <v-btn class="ma-5" fab :color="userDefendedPosts.includes(post.id) ? 'cyan' : ''" dark @click="Vote(2,post.id)">
             <v-icon large>mdi-shield-half-full</v-icon>
@@ -179,6 +178,15 @@
       }
     },
     methods: {
+      getHealthBarColor(health){
+        // depending on health condition of the post display different color
+        if(health > 66)
+          return 'green'
+        else if(health <= 66 && health > 33)
+          return '#fcb103'
+        else
+          return 'red'
+      },
       sortBy(prop){
         if(prop === "title")
         {

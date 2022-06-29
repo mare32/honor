@@ -59,7 +59,6 @@
                 prepend-icon="mdi-camera"
                 accept="image/*"
                 v-model="image"
-                @change="uploadImage($event)"
               ></v-file-input>
               </v-col>
               <v-col cols="12">
@@ -104,16 +103,12 @@ import FormData from 'form-data'
 export default {
     name:'EditPostPopup',
     props:{
-        title:String,
-        blogPostContent:String,
-        postId: Number,
-        categoryValues: Array,
-        update : Boolean
+        postId: Number
         },
     data:() =>({
         dialog: false,
         image:null,
-        titleValue:'',
+        title:'',
         content:'',
         imgAlt:'',
         categories:[],
@@ -130,6 +125,9 @@ export default {
             {
                 for(let category of response.data.categories)
                 dis.categoryValues.push(category.id+"-"+category.name)
+
+                dis.content = response.data.content
+                dis.title = response.data.title
                 
             }).catch(err => {
                 console.log(err);
@@ -147,11 +145,6 @@ export default {
             })
     },
     methods:{
-      UpdateTitle(newTitle)
-      {
-        this.titleValue = newTitle
-        // this.$emit('updateTitle', newTitle)
-      },
       UpdateBlogPost()
       {
         this.loading = true

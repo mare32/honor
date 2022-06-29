@@ -43,7 +43,7 @@
           >
             <strong>{{ Math.ceil(post.shield) }} <v-icon small dark>mdi-shield</v-icon></strong>
           </v-progress-linear>
-        <v-progress-linear
+        <!-- <v-progress-linear
             v-if="post.health < post.health/2"
             :value="post.health"
             height="20"
@@ -51,16 +51,15 @@
             rounded
             class="my-2"
           >
-            <strong>{{ Math.ceil(post.health) }}<v-icon small>mdi-water</v-icon></strong>
-          </v-progress-linear>
+            <strong>{{ Math.ceil(post.health) }}<v-icon small>mdi-hospital</v-icon></strong>
+          </v-progress-linear> -->
           <v-progress-linear
-            v-else
             :value="post.health"
             height="20"
-            color="green"
+            :color="getHealthBarColor()"
             rounded
           >
-            <strong>{{ Math.ceil(post.health) }}<v-icon dark>mdi-hospital</v-icon></strong>
+            <strong>{{ Math.ceil(post.health) }}<v-icon>mdi-hospital</v-icon></strong>
           </v-progress-linear>
           <v-btn class="ma-5" fab :color="userDefendedPost ? 'cyan' : ''" dark @click="VotePost(2)">
             <v-icon large>mdi-shield-half-full</v-icon>
@@ -302,8 +301,6 @@ export default {
                 else
                 dis.subcomments.push(comment)
               }
-            // setTimeout(function(){this.waitForDataToLoad = false },1000)
-              // console.log(dis.subcomments);
         })
         .catch(function (error) {
         console.log(error);
@@ -311,6 +308,15 @@ export default {
         
     },
     methods:{
+      getHealthBarColor(){
+        // depending on health condition of the post display different color
+        if(this.post.health > 66)
+          return 'green'
+        else if(this.post.health <= 66 && this.post.health > 33)
+          return '#fcb103'
+        else
+          return 'red'
+      },
       postComment()
       {
         if(!localStorage.getItem('token'))

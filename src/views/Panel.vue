@@ -75,7 +75,7 @@
                     >
                         <strong>{{ Math.ceil(post.shield) }}<v-icon small>mdi-shield</v-icon></strong>
                     </v-progress-linear>
-                    <v-progress-linear
+                    <!-- <v-progress-linear
                         v-if="post.health < 50"
                         :value="post.health"
                         height="20"
@@ -83,12 +83,11 @@
                         rounded
                     >
                         <strong>{{ Math.ceil(post.health) }}<v-icon>mdi-hospital</v-icon></strong>
-                    </v-progress-linear>
+                    </v-progress-linear> -->
                     <v-progress-linear
-                        v-else
                         :value="post.health"
                         height="20"
-                        color="green"
+                        :color="getHealthBarColor(post.health)"
                         rounded
                     >
                         <strong>{{ Math.ceil(post.health) }}<v-icon dark>mdi-hospital</v-icon></strong>
@@ -239,19 +238,9 @@
                         <strong>{{ Math.ceil(post.shield) }}<v-icon small>mdi-shield</v-icon></strong>
                     </v-progress-linear>
                     <v-progress-linear
-                        v-if="post.health < 50"
                         :value="post.health"
                         height="20"
-                        color="red"
-                        rounded
-                    >
-                        <strong>{{ Math.ceil(post.health) }}<v-icon>mdi-hospital</v-icon></strong>
-                    </v-progress-linear>
-                    <v-progress-linear
-                        v-else
-                        :value="post.health"
-                        height="20"
-                        color="green"
+                        :color="getHealthBarColor(post.health)"
                         rounded
                     >
                         <strong>{{ Math.ceil(post.health) }}<v-icon dark>mdi-hospital</v-icon></strong>
@@ -428,9 +417,6 @@
         newCategoryName:''
       }
     },
-    methods:{
-        
-    },
     created(){
         if(!localStorage.getItem("token"))
              setTimeout(function(){window.location.href = "/"},3000)
@@ -484,7 +470,7 @@
             })
           let td = new Date().toISOString().slice(0, 10)
           // dateFrom should be dynamic and customizable
-        axios.get('http://localhost:5000/api/useCaseLogs?dateFrom=2022-06-26&dateTo=2022-06-27',config)
+        axios.get('http://localhost:5000/api/useCaseLogs?dateFrom=2022-06-29&dateTo=2022-06-30',config)
              .then(function(response)
             {
               let tmpVal;
@@ -502,6 +488,15 @@
             })
     },
     methods:{
+      getHealthBarColor(health){
+        // depending on health condition of the post display different color
+        if(health > 66)
+          return 'green'
+        else if(health <= 66 && health > 33)
+          return '#fcb103'
+        else
+          return 'red'
+      },
       actionChange()
       {
         if(this.selectedAction == "Delete")

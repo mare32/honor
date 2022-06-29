@@ -25,31 +25,15 @@
                         <strong>{{ Math.ceil(post.shield) }}<v-icon small>mdi-shield</v-icon></strong>
                     </v-progress-linear>
                     <v-progress-linear
-                        v-if="post.health < 50"
                         v-model="post.health"
                         height="20"
-                        color="red"
-                        rounded
-                    >
-                        <strong>{{ Math.ceil(post.health) }}<v-icon>mdi-hospital</v-icon></strong>
-                    </v-progress-linear>
-                    <v-progress-linear
-                        v-else
-                        v-model="post.health"
-                        height="20"
-                        color="green"
+                        :color="getHealthBarColor(post.health)"
                         rounded
                     >
                         <strong>{{ Math.ceil(post.health) }}<v-icon dark>mdi-hospital</v-icon></strong>
                     </v-progress-linear>
                     <v-card class="my-5 pa-2" flat>
-                        <!-- <router-link :to="{name:'Edit',path:'/edit/'+post.id,params:{id:post.id}}" style="text-decoration:none;color:grey">
-                        <v-btn color="primary" >
-                        <v-icon large left> mdi-note-edit </v-icon>
-                        Edit
-                        </v-btn>
-                        </router-link> -->
-                        <EditPostPopup absolute :postId="post.id" :title="post.title" :blogPostContent="post.blogPostContent" :categoryValues="post.categories" @updateTitle="post.title"/>
+                        <EditPostPopup absolute :postId="post.id"/>
                     </v-card>
                     <v-card class="my-5 pa-2" flat>
                         <DeletePopup absolute :postId="post.id" :title="post.title" />
@@ -129,6 +113,15 @@ export default {
             })
     },
     methods:{
+        getHealthBarColor(health){
+        // depending on health condition of the post display different color
+        if(health > 66)
+          return 'green'
+        else if(health <= 66 && health > 33)
+          return '#fcb103'
+        else
+          return 'red'
+      },
         hideOrUnhidePost(postId,status)
       {
         let unhideStatusId = 0
