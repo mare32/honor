@@ -43,13 +43,11 @@
                 sm="12"
               >
                 <v-autocomplete
-                disabled
                   v-model="categoryValues"
                   :items="categories"
                   label="Categories*"
                   multiple
                 ></v-autocomplete>
-                  <!-- :value="categoryValues" -->
               </v-col>
               <v-col
                 cols="12"
@@ -118,25 +116,36 @@ export default {
         titleValue:'',
         content:'',
         imgAlt:'',
-        categoryValueNames:[],
-        categoryValueIds:[],
-        categories:['Health', 'Travel', 'Soccer', 'Basketball'],
+        categories:[],
+        categoryValues: [],
         loading: false
     }),
-    // updated(){
-    //     if(this.update)
-    //     {
-    //         console.log( this.categoryValues);
-    //         for(let cat in this.categoryValues){
-    //             this.categoryValueNames.push(cat.name)
-    //             this.categoryValueIds.push(cat.id)
-    //         }
-    //         this.update = false
-    //         this.$forceUpdate()
-    //     }
-    //     console.log(this.categoryValueNames);
+    mounted(){
+      let dis = this
+      const config = {
+                headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+            };
+            axios.get('http://localhost:5000/api/blogposts/'+dis.postId)
+             .then(function(response)
+            {
+                for(let category of response.data.categories)
+                dis.categoryValues.push(category.id+"-"+category.name)
+                
+            }).catch(err => {
+                console.log(err);
+            })
 
-    // },
+
+            axios.get('http://localhost:5000/api/categories?perPage=100',config)
+             .then(function(response)
+            {
+                for(let category of response.data.data)
+                dis.categories.push(category.id+"-"+category.name)
+                
+            }).catch(err => {
+                console.log(err);
+            })
+    },
     methods:{
       UpdateTitle(newTitle)
       {
@@ -172,11 +181,6 @@ export default {
         });
       }
     },
-    watch: {
-    // titleLocaly(newContent) {
-    //   this.titleLocal = newContent // Update when the prop changes
-    // }
-  },
   computed:{
     titleLocal: {
             get: function() {

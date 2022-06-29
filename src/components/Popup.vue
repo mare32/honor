@@ -139,13 +139,6 @@ export default {
             })
     },
     methods:{
-      // uploadImage(event){
-      //   // this.image = event
-      //   console.log(this.image)
-      //   // this.image = event.target.files[0]
-      //   // console.log(this.image.name)
-      //   // axios.post('http://localhost:5000/blogposts')
-      // },
       addPost(event){
         let tmp;
         let dis = this
