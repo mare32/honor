@@ -298,20 +298,25 @@
                     </v-btn>
                   </td>
                 </tr>
+                <ValidationObserver v-slot="{handleSubmit}">
                 <tr>
                 <td class="tdNewCat">
-                  <v-text-field
-                  solo
-                  label="New category"
-                  dense
-                  class="mt-5"
-                  v-model="newCategoryName"
-                  ></v-text-field>
+                  <ValidationProvider name="Category" rules="required|alpha|min:3|max:30" v-slot="{ errors }">
+                    <v-text-field
+                    solo
+                    label="New category"
+                    dense
+                    class="mt-5"
+                    v-model="newCategoryName"
+                    ></v-text-field>
+                    <span>{{ errors[0] }}</span>
+                  </ValidationProvider>
                 </td>
                 <td colspan="2">
-                  <v-btn color="primary" @click="addCategory">Add</v-btn>
+                  <v-btn color="primary" @click="handleSubmit(addCategory)">Add</v-btn>
                 </td>
               </tr>
+                </ValidationObserver>
             </tbody>
             </template>
         </v-simple-table>
@@ -385,6 +390,14 @@
 </template>
 <script>
     import axios from 'axios'
+    import { ValidationProvider, ValidationObserver } from 'vee-validate';
+    import {  extend } from 'vee-validate';
+    import { required, min, max, alpha } from 'vee-validate/dist/rules';
+
+    extend('required', required);
+    extend('min', min);
+    extend('max', max);
+    extend('alpha', alpha);
     export default {
     name:'Panel',
     data () {
@@ -438,6 +451,7 @@
             })
     },
     mounted(){
+            let td = new Date().toISOString().slice(0, 10)
             const config = {
                 headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
             };
@@ -468,9 +482,9 @@
             }).catch(err => {
                 console.log(err);
             })
-          let td = new Date().toISOString().slice(0, 10)
+          td = td.toString()
           // dateFrom should be dynamic and customizable
-        axios.get('http://localhost:5000/api/useCaseLogs?dateFrom='+td+'&dateTo=2022-06-30',config)
+        axios.get('http://localhost:5000/api/useCaseLogs?dateFrom='+td+'&dateTo=2022-07-30',config)
              .then(function(response)
             {
               let tmpVal;
