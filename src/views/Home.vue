@@ -3,60 +3,77 @@
   <!-- <p class="headline grey--text text-center">Home</p> -->
     <v-container class="my-5">
       <v-layout row class="mb-3">
-        <v-tooltip top small>
-           <template v-slot:activator="{on, attrs}">
-          <v-btn text color="grey" @click="sortBy('title')" v-on="on" v-bind="attrs">
-            <v-icon left small>mdi-post </v-icon>
-            <span class="caption text-lowercase">By Post Name</span>
+        <v-row>
+          <v-col cols="12" sm="12">
+            <v-tooltip top small>
+             <template v-slot:activator="{on, attrs}">
+            <v-btn text color="black" v-on="on" v-bind="attrs">
+              <v-icon left>mdi-sort-alphabetical-variant</v-icon>
+              <span class="black--text">Sorting:</span>
+            </v-btn>
+            </template>
+            <!-- <span>Sort by name</span> -->
+          </v-tooltip>
+          <v-tooltip top small>
+             <template v-slot:activator="{on, attrs}">
+            <v-btn text color="grey" @click="sortBy('title')" v-on="on" v-bind="attrs">
+              <v-icon left small>mdi-post </v-icon>
+              <span class="caption text-lowercase">By Post Name</span>
+            </v-btn>
+            </template>
+            <span>Sort by name</span>
+          </v-tooltip>
+          <v-tooltip top small>
+             <template v-slot:activator="{on, attrs}">
+          <v-btn text color="grey" @click="sortBy('author')" v-on="on" v-bind="attrs">
+            <v-icon left small>mdi-account</v-icon>
+            <span class="caption text-lowercase">By Author</span>
           </v-btn>
           </template>
-          <span>Sort by name</span>
-        </v-tooltip>
-        <v-tooltip top small>
-           <template v-slot:activator="{on, attrs}">
-        <v-btn text color="grey" @click="sortBy('author')" v-on="on" v-bind="attrs">
-          <v-icon left small>mdi-account</v-icon>
-          <span class="caption text-lowercase">By Author</span>
-        </v-btn>
-        </template>
-          <span>Sort by author</span>
-        </v-tooltip>
-        <v-tooltip top small>
-           <template v-slot:activator="{on, attrs}">
-        <v-btn text color="grey" @click="sortBy('health')" v-on="on" v-bind="attrs">
-          <v-icon left small>mdi-hospital</v-icon>
-          <span class="caption text-lowercase">By Health</span>
-        </v-btn>
-        </template>
-          <span>Sort by health</span>
-        </v-tooltip>
-        <v-tooltip top small>
-           <template v-slot:activator="{on, attrs}">
-        <v-btn text color="grey" @click="sortBy('createdAt')" v-on="on" v-bind="attrs">
-          <v-icon left small>mdi-calendar-range</v-icon>
-          <span class="caption text-lowercase">By Date</span>
-        </v-btn>
-        </template>
-          <span>Sort by date</span>
-        </v-tooltip>
-        <span>
-          <v-text-field dense label="Search" prepend-icon="mdi-magnify" single-line v-model="search" @keyup="SearchDbWithKeyword"></v-text-field>
-        </span>
-      <div class="mx-5">
-        <v-select
-          :items="perPageSelect"
-          label="Per Page"
-          dense
-          prepend-icon="mdi-layers-search-outline"
-          @change="ChangePerPage"
-          v-model="perPage"
-        ></v-select>
-        <br>
-        <span class="ml-5 caption text-lowercase">Pages:</span>
-        <v-btn text color="grey" v-for="p in pages" :key="p" @click="PaginationLinkClick(p)"> <!-- PAGING -->
-          <span :class="`caption text-lowercase ${activePage == p ? 'active' : ''}`">{{p}}</span>
-        </v-btn>
-      </div>
+            <span>Sort by author</span>
+          </v-tooltip>
+          <v-tooltip top small>
+             <template v-slot:activator="{on, attrs}">
+          <v-btn text color="grey" @click="sortBy('health')" v-on="on" v-bind="attrs">
+            <v-icon left small>mdi-hospital</v-icon>
+            <span class="caption text-lowercase">By Health</span>
+          </v-btn>
+          </template>
+            <span>Sort by health</span>
+          </v-tooltip>
+          <v-tooltip top small>
+             <template v-slot:activator="{on, attrs}">
+          <v-btn text color="grey" @click="sortBy('createdAt')" v-on="on" v-bind="attrs">
+            <v-icon left small>mdi-calendar-range</v-icon>
+            <span class="caption text-lowercase">By Date</span>
+          </v-btn>
+          </template>
+            <span>Sort by date</span>
+          </v-tooltip>
+          </v-col>
+          
+        </v-row>
+        <v-row>
+          
+          <span>
+            <v-text-field dense label="Search" prepend-icon="mdi-magnify" single-line v-model="search" @keyup="SearchDbWithKeyword"></v-text-field>
+          </span>
+        <div class="mx-5">
+          <v-select
+            :items="perPageSelect"
+            label="Per Page"
+            dense
+            prepend-icon="mdi-layers-search-outline"
+            @change="ChangePerPage"
+            v-model="perPage"
+          ></v-select>
+          <br>
+          <span class="ml-5 caption text-lowercase">Pages:</span>
+          <v-btn text color="grey" v-for="p in pages" :key="p" @click="PaginationLinkClick(p)"> <!-- PAGING -->
+            <span :class="`caption text-lowercase ${activePage == p ? 'active' : ''}`">{{p}}</span>
+          </v-btn>
+        </div>
+        </v-row>
       </v-layout>
       <div v-if="dbBlogPosts.length">
       <v-card v-for="post in dbBlogPosts" :key="post.id" class="my-5">
@@ -101,15 +118,6 @@
           >
             <strong>{{ Math.ceil(post.shield) }}<v-icon small>mdi-shield</v-icon></strong>
           </v-progress-linear>
-          <!-- <v-progress-linear
-            v-if="post.health < 50"
-            v-model="post.health"
-            height="20"
-            color="red"
-            rounded
-          >
-            <strong>{{ Math.ceil(post.health) }}<v-icon>mdi-hospital</v-icon></strong>
-          </v-progress-linear> -->
           <v-progress-linear
             v-model="post.health"
             height="20"
