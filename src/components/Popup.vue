@@ -1,5 +1,6 @@
 <template>
    <v-row justify="center">
+    <ValidationObserver v-slot="{handleSubmit}">
     <v-dialog
       v-model="dialog"
       persistent
@@ -23,42 +24,54 @@
           <v-container>
             <v-row>
               <v-col cols="12">
+                <ValidationProvider name="Title" rules="required|min:3|max:50" v-slot="{ errors }">
                 <v-text-field
                   solo
                   label="Title*"
                   required
                   v-model="title"
                 ></v-text-field>
+                <span>{{ errors[0] }}</span>
+                </ValidationProvider>
               </v-col>
               <v-col cols="12">
+                <ValidationProvider name="Blog post content" rules="required|min:3" v-slot="{ errors }">
                 <v-textarea
                 solo
                 name="input-7-4"
                 label="Content*"
                 v-model="content"
                 ></v-textarea>
+                <span>{{ errors[0] }}</span>
+                </ValidationProvider>
               </v-col>
               <v-col
                 cols="12"
                 sm="12"
               >
+              <ValidationProvider name="Categories" rules="required" v-slot="{ errors }">
                 <v-autocomplete
                   :items="categories"
                   label="Categories*"
                   multiple
                   v-model='categoryValues'
                 ></v-autocomplete>
+                <span>{{ errors[0] }}</span>
+                </ValidationProvider>
               </v-col>
               <v-col
                 cols="12"
                 sm="12"
               >
+              <ValidationProvider name="Image" rules="required|image" v-slot="{ errors }">
               <v-file-input
                 label="Add image*"
                 prepend-icon="mdi-camera"
                 accept="*"
                 v-model="image"
               ></v-file-input>
+              <span>{{ errors[0] }}</span>
+              </ValidationProvider>
               </v-col>
               <v-col cols="12">
                 <v-text-field
@@ -92,7 +105,7 @@
           <v-btn
             color="green darken-1"
             text
-            @click="addPost"
+            @click="handleSubmit(addPost)"
             :loading="loading"
           >
             Add
@@ -100,13 +113,23 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    </ValidationObserver>
   </v-row>
 </template>
 
 <script>
 import axios from 'axios'
 import FormData from 'form-data'
-// import fs from 'fs'
+import { ValidationProvider, ValidationObserver } from 'vee-validate';
+import { validate, extend} from 'vee-validate';
+import { required, email, min, max, alpha, image } from 'vee-validate/dist/rules';
+
+extend('required', required);
+extend('email', email);
+extend('min', min);
+extend('max', max);
+extend('alpha', alpha);
+extend('image', image);
 export default {
     name:'Popup',
     data:() =>({
