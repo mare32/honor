@@ -143,11 +143,9 @@ export default {
         let tmp;
         let dis = this
         var data = new FormData();
-        // data.append('Image', fs.createReadStream('/C:/Users/Gaming/Pictures/Uncategorized/chill-06.jpg'));
         data.append('Title', this.title);
         data.append('image',this.image); 
         data.append('BlogPostContent', this.content);
-        // foreach categoryValues - kako uzeti samo value a ne naziv, mozda dodati id u naziv i uraditi split? - jedno resenje
         for(let catId of this.categoryValues)
         {
           tmp = catId.split("-")

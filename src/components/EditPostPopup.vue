@@ -88,6 +88,7 @@
                 <v-text-field
                   solo
                   label="Image alt"
+                  v-model="imgAlt"
                 ></v-text-field>
                 <!-- <span>{{ errors[0] }}</span>
                 </ValidationProvider> -->
@@ -207,18 +208,6 @@ export default {
             let index = this.imagesToDelete.indexOf(imageId);
             this.imagesToDelete.splice(index,1)
           }
-        console.log(this.imagesToDelete)
-            // const config = {
-            // headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-            // };
-            // axios.delete('http://localhost:5000/api/images/'+imageId,config)
-            //  .then(function(response)
-            // {
-            //   alert("Slika je obrisana")
-            //   window.location.reload()
-            // }).catch(err => {
-            //     console.log(err);
-            // })
       },
       changeCoverImage(imageId){
         this.coverImgId = imageId
@@ -245,7 +234,7 @@ export default {
 
         axios(config)
         .then(function (response) {
-          dis.loading = false
+          
           // update kategorija 
           config.url = 'http://localhost:5000/api/blogpostcategories'
           config.method = 'put'
@@ -263,26 +252,51 @@ export default {
           axios(config)
         .then(function (response) {
 
-
+            if(dis.imagesToDelete.length)
+        {
+          config.url = 'http://localhost:5000/api/images'
+          config.method = 'delete'
+          config.data = 
+          { 
+            "imageIds":dis.imagesToDelete
+          }
+          axios(config).then(function (response) {
+              // alert("Images deleted")
         }).catch(function (error) {
           console.log(error);
         });
-        // Dodavanje nove slike ukoliko je prikazano polje
-        if(dis.imagesToDelete.length)
-        {
-          console.log(dis.imagesToDelete);
         }
-        if(dis.showNewImageFields)
-        {
-          var imageData = new FormData();
-          
-        }
+          if(dis.showNewImageFields)
+          {
+            var imageData = new FormData();
+            imageData.append('blogPostId', dis.postId);
+            imageData.append('image',dis.image); 
+            imageData.append('alt',dis.imgAlt); 
+            var imageConfig = {
+            method: 'post',
+            url: 'http://localhost:5000/api/blogPostImages',
+            headers: { 
+              'Authorization': 'Bearer '+localStorage.getItem('token')
+            },
+            data : imageData
+            };
+            axios(imageConfig)
+            .then(function(response){
+            }).catch(function (error) {
+            console.log(error);
+              });
+          }
+        }).catch(function (error) {
+          console.log(error);
+        });
+        
 
-          window.location.reload()
         })
         .catch(function (error) {
           console.log(error);
         });
+        
+        setTimeout(function(){window.location.reload()}, 2000)
       }
     }
 }
