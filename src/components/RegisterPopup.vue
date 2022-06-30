@@ -1,10 +1,11 @@
 <template>
    <v-row justify="center">
-    <v-dialog
-      v-model="dialog"
-      persistent
-      max-width="600px"
-    >
+     <ValidationObserver v-slot="{handleSubmit}">
+      <v-dialog
+        v-model="dialog"
+        persistent
+        max-width="600px"
+      >
       <template v-slot:activator="{ on, attrs }">
         <v-btn
           color="primary"
@@ -21,48 +22,62 @@
         </v-card-title>
         <v-card-text>
           <v-container>
+           
             <v-row>
               <v-col cols="12">
+                <ValidationProvider name="Firstname" rules="required|alpha" v-slot="{ errors }">
                 <v-text-field
                   solo
                   label="Firstname*"
                   required
                   v-model="firstname"
                 ></v-text-field>
+                <span>{{ errors[0] }}</span>
+                </ValidationProvider>
               </v-col>
             </v-row>
             <v-row>
               <v-col cols="12">
+                <ValidationProvider name="Lastname" rules="required|alpha" v-slot="{ errors }">
                 <v-text-field
                   solo
                   label="Lastname*"
                   required
                   v-model="lastname"
                 ></v-text-field>
+                 <span>{{ errors[0] }}</span>
+                </ValidationProvider>
               </v-col>
             </v-row>
             <v-row>
               <v-col cols="12">
+                <ValidationProvider name="Username" rules="required|min:4|max:20" v-slot="{ errors }">
                 <v-text-field
                   solo
                   label="Username*"
                   required
                   v-model="username"
                 ></v-text-field>
+                <span>{{ errors[0] }}</span>
+                </ValidationProvider>
               </v-col>
             </v-row>
             <v-row>
               <v-col cols="12">
+                <ValidationProvider name="Email" rules="required|email" v-slot="{ errors }">
                 <v-text-field
                   solo
                   label="Email*"
                   required
                   v-model="email"
                 ></v-text-field>
+                <span>{{ errors[0] }}</span>
+                </ValidationProvider>
               </v-col>
             </v-row>
             <v-row>
               <v-col cols="12">
+                <ValidationProvider name="Password" rules="required|min:4|max:10" v-slot="{ errors }">
                 <v-text-field
                   solo
                   label="Password*"
@@ -70,6 +85,8 @@
                   type="password"
                   v-model="password"
                 ></v-text-field>
+                <span>{{ errors[0] }}</span>
+                </ValidationProvider>
               </v-col>
             </v-row>
           </v-container>
@@ -97,18 +114,30 @@
             color="green darken-1"
             text
             :loading="loading"
-            @click="handleRegistration"
+            @click="handleSubmit(handleRegistration)"
           >
             Register
           </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
+    </ValidationObserver>
   </v-row>
 </template>
 
 <script>
 import axios from 'axios'
+import { ValidationProvider, ValidationObserver } from 'vee-validate';
+import { validate, extend} from 'vee-validate';
+import { required, email, integer, between, min, max, alpha } from 'vee-validate/dist/rules';
+
+extend('required', required);
+extend('email', email);
+extend('integer', integer);
+extend('between', between);
+extend('min', min);
+extend('max', max);
+extend('alpha', alpha);
 export default {
     name:'RegisterPopup',
     data:() =>({
@@ -124,7 +153,11 @@ export default {
         username:'',
         loading:false
     }),
+    components:{
+      ValidationObserver, ValidationProvider,validate,required,email
+    },
     methods:{
+      
       handleRegistration(){
             var vm = this
             this.loading = true

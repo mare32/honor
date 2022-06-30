@@ -470,7 +470,7 @@
             })
           let td = new Date().toISOString().slice(0, 10)
           // dateFrom should be dynamic and customizable
-        axios.get('http://localhost:5000/api/useCaseLogs?dateFrom=2022-06-29&dateTo=2022-06-30',config)
+        axios.get('http://localhost:5000/api/useCaseLogs?dateFrom='+td+'&dateTo=2022-06-30',config)
              .then(function(response)
             {
               let tmpVal;

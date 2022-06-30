@@ -93,11 +93,8 @@ export default {
               headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
           };
         axios.get('http://localhost:5000/api/blogposts?loggedUsersPosts=true',config).then(function(response){
-              dis.totalCountOfPosts = response.data.totalCount // TOTAL COUNT
-            //   for(let i = 1; i <= response.data.pagesCount; i++)
-            //     dis.pages.push(i)  // broj stranica
+              dis.totalCountOfPosts = response.data.totalCount
                 dis.usersPosts = response.data.data
-                console.log(dis.usersPosts);
                 for(let post of dis.usersPosts)
                 {
                   post.createdAt = post.createdAt.split("T")
