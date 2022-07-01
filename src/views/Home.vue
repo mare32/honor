@@ -76,19 +76,28 @@
         </v-row>
       </v-layout>
       <div v-if="dbBlogPosts.length">
-      <v-card v-for="post in dbBlogPosts" :key="post.id" class="my-5">
-        <v-row row wrap :class="`pr-12 pa-3 post ${post.status}`">
+      <v-card v-for="post in dbBlogPosts" :key="post.id" class="my-5" :img="post.status == 'Amazing' ? '/img/amazing.jpg' : ''">
+        <v-row row wrap :class="`pr-12 pa-3 post ${post.status}`" >
+          <v-col cols="2" md="2">
+            <v-icon v-if="post.status == 'Amazing'" class="white--text" large>mdi-pin</v-icon>
+            <v-avatar size="100" class="mx-5">
+              <img
+                :src="post.image.src"
+                :alt="post.image.alt"
+              >
+            </v-avatar>
+          </v-col >
           <v-col cols="12" md="6">
             <div class="caption grey--text">Post title</div>
             <router-link :to="{name:'Post',path:'/post/'+post.id,params:{id:post.id}}"><h2>{{post.title}}</h2></router-link>
           </v-col >
           <v-col xs="2">
             <div class="caption grey--text">Author</div>
-            <div>{{post.author.username}}</div>
+            <div :class="`caption ${post.status == 'Amazing' ? 'white--text' : 'grey--text'}`">{{post.author.username}}</div>
           </v-col >
           <v-col xs="2">
             <div class="caption grey--text">Created at</div>
-            <div>{{post.createdAt}}</div>
+            <div :class="`caption ${post.status == 'Amazing' ? 'white--text' : 'grey--text'}`">{{post.createdAt}}</div>
           </v-col >
           <v-col xs="2">
             <div class="caption grey--text">Categories</div>
@@ -97,11 +106,17 @@
           <v-col xs="2">
             <div class="text-right">
               <div class="caption grey--text">Status</div>
-              <v-chip small :class="`${post.status} white--text caption my-2`">{{post.status}}</v-chip>
+              <v-chip small :class="`${post.status} white--text caption my-2`">{{post.status}}&nbsp;<span v-if="post.status == 'Amazing'">(5)</span></v-chip>
             </div>
           </v-col >
+          <!-- <v-col xs="2">
+            <div class="text-right">
+              <div class="caption grey--text">Amazing ends in:</div>
+              <v-chip small :class="`${post.status} white--text caption my-2`">days</v-chip>
+            </div>
+          </v-col > -->
         </v-row>
-        <v-row row wrap :class="`pa-12`">
+        <v-row row wrap :class="`pa-12 ${post.status == 'Amazing' ? 'white--text' : ''}` ">
           {{post.blogPostContent}}
         </v-row>
         <v-row row wrap justify="space-around" :class="`pa-12`">
@@ -131,6 +146,12 @@
           </v-btn>
         </v-row>
       </v-card>
+      <div class="mx-5">
+          <span class="ml-5 caption text-lowercase">Pages:</span>
+          <v-btn text color="grey" v-for="p in pages" :key="p" @click="PaginationLinkClick(p)"> <!-- PAGING -->
+            <span :class="`caption text-lowercase ${activePage == p ? 'active' : ''}`">{{p}}</span>
+          </v-btn>
+        </div>
       </div>
       <div v-else-if="networkError" class="ma">
           <v-alert
@@ -169,7 +190,7 @@
     name: 'Home',
     data() {
       return{
-        sortedBy:'author',
+        sortedBy:'title',
         sortedHow:'asc',
         search:'',
         dbBlogPosts: [],
@@ -196,80 +217,169 @@
           return 'red'
       },
       sortBy(prop){
+        let dis = this
         if(prop === "title")
         {
           if(this.sortedHow === 'asc'){
-            this.dbBlogPosts.sort((a,b) => a[prop] < b[prop] ? -1 : 1)
             this.sortedHow = 'desc'
             this.sortedBy = 'title'
+
+        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page='+dis.page+'&keyword='+dis.search+"&sort="+dis.sortedBy+"-"+dis.sortedHow,{
+            }).then(function(response){
+                dis.loadingPosts = false
+                dis.dbBlogPosts = response.data.data
+                for(let post of dis.dbBlogPosts)
+                {
+                  post.createdAt = post.createdAt.split("T")
+                  post.createdAt = post.createdAt[0]
+                }
+            }).catch(err => {
+              console.log(err);
+              if(err.code == "ERR_NETWORK")
+              dis.networkError = true
+            })
+
+
           }
           else{
-            this.dbBlogPosts.sort((a,b) => a[prop] > b[prop] ? -1 : 1)
             this.sortedHow = 'asc'
             this.sortedBy = 'title'
+
+        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page='+dis.page+'&keyword='+dis.search+"&sort="+dis.sortedBy+"-"+dis.sortedHow,{
+            }).then(function(response){
+                dis.loadingPosts = false
+                dis.dbBlogPosts = response.data.data
+                for(let post of dis.dbBlogPosts)
+                {
+                  post.createdAt = post.createdAt.split("T")
+                  post.createdAt = post.createdAt[0]
+                }
+            }).catch(err => {
+              console.log(err);
+              if(err.code == "ERR_NETWORK")
+              dis.networkError = true
+            })
           }
         }
         if(prop === "author")
         {
           if(this.sortedHow === 'asc'){
-            this.dbBlogPosts.sort((a,b) => a[prop].username < b[prop].username ? -1 : 1)
             this.sortedHow = 'desc'
             this.sortedBy = 'author'
+        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page='+dis.page+'&keyword='+dis.search+"&sort="+dis.sortedBy+"-"+dis.sortedHow,{
+            }).then(function(response){
+                dis.loadingPosts = false
+                dis.dbBlogPosts = response.data.data
+                for(let post of dis.dbBlogPosts)
+                {
+                  post.createdAt = post.createdAt.split("T")
+                  post.createdAt = post.createdAt[0]
+                }
+            }).catch(err => {
+              console.log(err);
+              if(err.code == "ERR_NETWORK")
+              dis.networkError = true
+            })
           }
           else{
-            this.dbBlogPosts.sort((a,b) => a[prop].username > b[prop].username ? -1 : 1)
             this.sortedHow = 'asc'
             this.sortedBy = 'author'
+
+        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page='+dis.page+'&keyword='+dis.search+"&sort="+dis.sortedBy+"-"+dis.sortedHow,{
+            }).then(function(response){
+                dis.loadingPosts = false
+                dis.dbBlogPosts = response.data.data
+                for(let post of dis.dbBlogPosts)
+                {
+                  post.createdAt = post.createdAt.split("T")
+                  post.createdAt = post.createdAt[0]
+                }
+            }).catch(err => {
+              console.log(err);
+              if(err.code == "ERR_NETWORK")
+              dis.networkError = true
+            })
           }
         }
         if(prop === "health")
         {
           if(this.sortedHow === 'asc'){
-            this.dbBlogPosts.sort((a,b) => a[prop]+a['shield'] < b[prop]+b['shield'] ? -1 : 1)
             this.sortedHow = 'desc'
             this.sortedBy = 'health'
+
+        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page='+dis.page+'&keyword='+dis.search+"&sort="+dis.sortedBy+"-"+dis.sortedHow,{
+            }).then(function(response){
+                dis.loadingPosts = false
+                dis.dbBlogPosts = response.data.data
+                for(let post of dis.dbBlogPosts)
+                {
+                  post.createdAt = post.createdAt.split("T")
+                  post.createdAt = post.createdAt[0]
+                }
+            }).catch(err => {
+              console.log(err);
+              if(err.code == "ERR_NETWORK")
+              dis.networkError = true
+            })
           }
           else{
-            this.dbBlogPosts.sort((a,b) => a[prop]+a['shield'] > b[prop]+b['shield'] ? -1 : 1)
             this.sortedHow = 'asc'
             this.sortedBy = 'health'
+
+        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page='+dis.page+'&keyword='+dis.search+"&sort="+dis.sortedBy+"-"+dis.sortedHow,{
+            }).then(function(response){
+                dis.loadingPosts = false
+                dis.dbBlogPosts = response.data.data
+                for(let post of dis.dbBlogPosts)
+                {
+                  post.createdAt = post.createdAt.split("T")
+                  post.createdAt = post.createdAt[0]
+                }
+            }).catch(err => {
+              console.log(err);
+              if(err.code == "ERR_NETWORK")
+              dis.networkError = true
+            })
           }
         }
         if(prop === "createdAt")
         {
           if(this.sortedHow === 'asc'){
-
-            this.dbBlogPosts.sort((a,b) => 
-            {
-              let arr = a.createdAt.split("-")
-              let arr2 = b.createdAt.split("-")
-              if(arr[0] < arr2[0])
-              return -1
-              else if( arr[1] < arr2[1] && arr[0] == arr2[0])
-              return -1
-              else if( arr[2] < arr2[2] && arr[0] == arr2[0] && arr[1] == arr2[1])
-              return -1
-              else
-              return 1 
-            })
             this.sortedHow = 'desc'
             this.sortedBy = 'createdAt'
+        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page='+dis.page+'&keyword='+dis.search+"&sort="+dis.sortedBy+"-"+dis.sortedHow,{
+            }).then(function(response){
+                dis.loadingPosts = false
+                dis.dbBlogPosts = response.data.data
+                for(let post of dis.dbBlogPosts)
+                {
+                  post.createdAt = post.createdAt.split("T")
+                  post.createdAt = post.createdAt[0]
+                }
+            }).catch(err => {
+              console.log(err);
+              if(err.code == "ERR_NETWORK")
+              dis.networkError = true
+            })
           }
           else{
-            this.dbBlogPosts.sort((a,b) => {
-              let arr = a.createdAt.split("-")
-              let arr2 = b.createdAt.split("-")
-              if(arr[0] > arr2[0])
-              return -1
-              else if( arr[1] > arr2[1] && arr[0] == arr2[0])
-              return -1
-              else if( arr[2] > arr2[2] && arr[0] == arr2[0] && arr[1] == arr2[1])
-              return -1
-              else
-              return 1
-            })
             this.sortedHow = 'asc'
             this.sortedBy = 'createdAt'
+
+        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page='+dis.page+'&keyword='+dis.search+"&sort="+dis.sortedBy+"-"+dis.sortedHow,{
+            }).then(function(response){
+                dis.loadingPosts = false
+                dis.dbBlogPosts = response.data.data
+                for(let post of dis.dbBlogPosts)
+                {
+                  post.createdAt = post.createdAt.split("T")
+                  post.createdAt = post.createdAt[0]
+                }
+            }).catch(err => {
+              console.log(err);
+              if(err.code == "ERR_NETWORK")
+              dis.networkError = true
+            })
           }
         }
       },
@@ -279,15 +389,15 @@
         let dis = this
         this.loadingPosts = true
         this.networkError = false
-        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page='+page+"&keyword="+dis.search,{
+        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page='+dis.page+'&keyword='+dis.search+"&sort="+dis.sortedBy+"-"+dis.sortedHow,{
             }).then(function(response){
+                dis.loadingPosts = false
                 dis.dbBlogPosts = response.data.data
                 for(let post of dis.dbBlogPosts)
                 {
                   post.createdAt = post.createdAt.split("T")
                   post.createdAt = post.createdAt[0]
                 }
-                dis.loadingPosts = false
             }).catch(err => {
               console.log(err);
               if(err.code == "ERR_NETWORK")
@@ -298,7 +408,7 @@
         let dis = this
         this.loadingPosts = true
         this.networkError = false
-        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page=1&keyword='+dis.search,{
+        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page=1&keyword='+dis.search+"&sort="+dis.sortedBy+"-"+dis.sortedHow,{
             }).then(function(response){
                 dis.loadingPosts = false
                 dis.dbBlogPosts = response.data.data
@@ -325,7 +435,7 @@
           this.page = 1
         this.activePage = 1
         }
-        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page='+dis.page+"&keyword="+dis.search,{
+        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page=1&keyword='+dis.search+"&sort="+dis.sortedBy+"-"+dis.sortedHow,{
             }).then(function(response){
                 dis.dbBlogPosts = response.data.data
                 dis.loadingPosts = false
@@ -392,7 +502,7 @@
         this.networkError = false
         axios(config).then(function(response){
               // promeni stanje dugmeta 
-              axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page='+dis.page+"&keyword="+dis.search,{
+        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page=1&keyword='+dis.search+"&sort="+dis.sortedBy+"-"+dis.sortedHow,{
             }).then(function(response){
                 dis.loadingPosts = false
                 dis.dbBlogPosts = response.data.data
@@ -417,12 +527,6 @@
               alert("Unauthorized to vote")
             }
       }
-    },
-    computed:{
-      FilteredDbPosts(){
-       return this.dbBlogPosts.filter(post => { return post.title.toLowerCase().includes(this.search.toLowerCase()) })
-      },
-      
     },
     created(){
     document.title = "Blograd | Home"
@@ -449,7 +553,7 @@
               }
               })
             }
-      axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page='+dis.page,{
+        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page=1&keyword='+dis.search+"&sort="+dis.sortedBy+"-"+dis.sortedHow,{
             }).then(function(response){
               dis.totalCountOfPosts = response.data.totalCount // TOTAL COUNT
               // console.log(response.data.data)

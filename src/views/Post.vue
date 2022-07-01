@@ -3,6 +3,14 @@
     <div v-if="post">
         <v-card class="my-5">
         <v-row row wrap :class="`pr-12 pa-3 post ${post.status}`">
+          <v-col cols="2" md="2">
+            <v-avatar size="100">
+              <img
+                :src="post.image.src"
+                :alt="post.image.alt"
+              >
+            </v-avatar>
+          </v-col >
           <v-col cols="12" md="6">
             <div class="caption grey--text">Post title</div>
             <h2>{{post.title}}</h2>
@@ -43,16 +51,6 @@
           >
             <strong>{{ Math.ceil(post.shield) }} <v-icon small dark>mdi-shield</v-icon></strong>
           </v-progress-linear>
-        <!-- <v-progress-linear
-            v-if="post.health < post.health/2"
-            :value="post.health"
-            height="20"
-            color="blue"
-            rounded
-            class="my-2"
-          >
-            <strong>{{ Math.ceil(post.health) }}<v-icon small>mdi-hospital</v-icon></strong>
-          </v-progress-linear> -->
           <v-progress-linear
             :value="post.health"
             height="20"
@@ -64,11 +62,61 @@
           <v-btn class="ma-5" fab :color="userDefendedPost ? 'cyan' : ''" dark @click="VotePost(2)">
             <v-icon large>mdi-shield-half-full</v-icon>
           </v-btn>
+          <v-col cols="12" md="12">
+            <v-divider></v-divider>
+            <div class="text-center grey--text pa-5 display-1">Gallery</div><br/>
+            <div class="text-center">
+              <v-btn class="ma-5 text-center" color="primary" dark v-if="!showGallery" @click="showGallery = true">
+                <v-icon>mdi-view-gallery</v-icon>Show Gallery
+              </v-btn>
+              <v-btn class="ma-5" color="error" dark @click="showGallery = false" v-else>
+                <v-icon>mdi-view-gallery</v-icon>Hide Gallery
+              </v-btn>
+            </div>
+
+          </v-col>
+          <v-col cols="12" md="12">
+            <v-fab-transition>
+             <v-row v-show="showGallery">
+              <v-col
+                v-for="image in post.images"
+                :key="image.id"
+                class="d-flex child-flex"
+                cols="3"
+              >
+                <v-img
+                  :src="image.src"
+                  :lazy-src="image.src"
+                  aspect-ratio="1"
+                  class="grey lighten-2"
+                >
+                  <template v-slot:placeholder>
+                    <v-row
+                      class="fill-height ma-0"
+                      align="center"
+                      justify="center"
+                    >
+                      <v-progress-circular
+                        indeterminate
+                        color="grey lighten-5"
+                      ></v-progress-circular>
+                    </v-row>
+                  </template>
+                </v-img>
+              </v-col>
+            </v-row>
+            </v-fab-transition>
+          </v-col >
+         
         </v-row>
       </v-card>
       <v-card class="addComment">
+        
         <v-row row wrap>
-          <v-col cols="12" md="12">
+           <v-col cols="12" md="12">
+            <div class="text-center grey--text pa-5 display-1">Comment section</div>
+          </v-col>
+          <v-col cols="6" md="4" sm="3" class="pa-5">
             <span v-if="replyingTo">
               <v-btn @click="CancelReply">
                 <v-icon>mdi-close</v-icon>
@@ -83,7 +131,7 @@
            <v-btn
             color="green darken-1"
             dark
-            style="margin-left:40%;"
+            style="margin-left:0;"
             @click="postComment"
             :loading="addCommentLoading"
           >
@@ -124,7 +172,7 @@
               </v-btn>
               <span class="font-weight-bold">{{comment.upVotes}}</span>
             </div>
-            <v-col cols="6" md="6">
+            <v-col cols="6" md="6" class="mx-2">
                 <h2>{{comment.user.username}}</h2>
                 <h4>{{comment.commentText}}</h4>
                 <h4>{{comment.commentedAt}}</h4>
@@ -161,6 +209,7 @@
                       <span class="font-weight-bold">{{subcomment.upVotes}}</span>
                   </div>
                   <span>
+                    <h4 style="display:inline"><h2 style="display:inline"> | </h2>{{subcomment.commentedAt}}</h4>
                       <h2 style="display:inline"> | {{subcomment.user.username}} </h2>
                       <h4 style="display:inline">{{subcomment.commentText}}</h4>
                   </span>
@@ -211,7 +260,8 @@ export default {
             userAttackedPost:false,
             userDefendedPost:false,
             waitForDataToLoad:true,
-            postId:0
+            postId:0,
+            showGallery:false
         }
     },
     created(){
@@ -237,7 +287,6 @@ export default {
                      url: 'http://localhost:5000/api/blogposts/'+this.id,
                  };
             }
-
         axios(config)
         .then(function (response) {
           dis.postId = response.data.id
@@ -256,11 +305,15 @@ export default {
                 else if(vote.commentId != null)
                 dis.userDefendedComments.push(vote.commentId)
               }
-              })
+              }).catch(function(error){ })
+          let tmp
+          tmp = response.data.createdAt.split("T")
           dis.post = response.data
+          dis.post.createdAt = tmp[0]
+          // console.log(dis.post);
         })
         .catch(function (error) {
-        console.log(error);
+        // console.log(error);
         });
 
 
@@ -380,6 +433,8 @@ export default {
             });
           })
           .catch(function (error) {
+            dis.addCommentLoading = false
+            alert("Comment cannot be empty")
             console.log(error);
           });
           

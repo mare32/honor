@@ -33,6 +33,9 @@
                         <strong>{{ Math.ceil(post.health) }}<v-icon dark>mdi-hospital</v-icon></strong>
                     </v-progress-linear>
                     <v-card class="my-5 pa-2" flat>
+                        <v-chip small :class="`${post.status} white--text caption my-2`">{{post.status}}</v-chip>
+                    </v-card>
+                    <v-card class="my-5 pa-2" flat>
                         <EditPostPopup absolute :postId="post.id"/>
                     </v-card>
                     <v-card class="my-5 pa-2" flat>
@@ -149,10 +152,10 @@ export default {
           axios(config)
                .then(function(response)
               {
-                if(status != "Invisible")
-                  alert('Objava je sakrivena')
-                else
-                  alert('Objava je ponovo vidljiva')
+                // if(status != "Invisible")
+                //   alert('Objava je sakrivena')
+                // else
+                //   alert('Objava je ponovo vidljiva')
 
                   window.location.reload()
               }).catch(err => {
