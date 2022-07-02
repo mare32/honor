@@ -36,13 +36,13 @@
                         <v-chip small :class="`${post.status} white--text caption my-2`">{{post.status}}</v-chip>
                     </v-card>
                     <v-card class="my-5 pa-2" flat>
-                        <EditPostPopup absolute :postId="post.id"/>
+                        <EditPostPopup absolute :postId="post.id" v-if="post.status != 'Dead'" />
                     </v-card>
                     <v-card class="my-5 pa-2" flat>
                         <DeletePopup absolute :postId="post.id" :title="post.title" />
                     </v-card>
                     <v-card class="my-5 pa-2" flat>
-                        <v-btn :dark="post.status == 'Invisible' ? false : true" :color="post.status == 'Invisible' ? 'white' : 'black'" @click="hideOrUnhidePost(post.id,post.status)">
+                        <v-btn v-if="post.status != 'Dead'" :dark="post.status == 'Invisible' ? false : true" :color="post.status == 'Invisible' ? 'white' : 'black'" @click="hideOrUnhidePost(post.id,post.status)">
                             <v-icon v-if="post.status != 'Invisible'">mdi-eye-off</v-icon>
                             <v-icon v-else>mdi-eye</v-icon>
                         </v-btn>
@@ -152,10 +152,6 @@ export default {
           axios(config)
                .then(function(response)
               {
-                // if(status != "Invisible")
-                //   alert('Objava je sakrivena')
-                // else
-                //   alert('Objava je ponovo vidljiva')
 
                   window.location.reload()
               }).catch(err => {

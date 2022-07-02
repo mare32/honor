@@ -1,7 +1,7 @@
 <template>
   <div>
     <div v-if="post">
-        <v-card class="my-5">
+        <v-card class="my-5" :img="post.status == 'Amazing' ? '/img/amazing.jpg' : ''">
         <v-row row wrap :class="`pr-12 pa-3 post ${post.status}`">
           <v-col cols="2" md="2">
             <v-avatar size="100">
@@ -13,15 +13,15 @@
           </v-col >
           <v-col cols="12" md="6">
             <div class="caption grey--text">Post title</div>
-            <h2>{{post.title}}</h2>
+            <h2 :class="`${post.status == 'Amazing' ? 'white--text' : ''}`">{{post.title}}</h2>
           </v-col >
           <v-col xs="2">
             <div class="caption grey--text">Author</div>
-            <div>{{post.author.username}}</div>
+            <div :class="`${post.status == 'Amazing' ? 'white--text' : ''}`">{{post.author.username}}</div>
           </v-col >
           <v-col xs="2">
             <div class="caption grey--text">Created at</div>
-            <div>{{post.createdAt}}</div>
+            <div :class="`${post.status == 'Amazing' ? 'white--text' : ''}`">{{post.createdAt}}</div>
           </v-col >
           <v-col xs="2">
             <div class="caption grey--text">Categories</div>
@@ -30,11 +30,11 @@
           <v-col xs="2">
             <div class="text-right">
               <div class="caption grey--text">Status</div>
-              <v-chip small :class="`${post.status} white--text caption my-2`">{{post.status}}</v-chip>
+                <v-chip small :class="`${post.status} white--text caption my-2`">{{post.status}}&nbsp;<span v-if="post.status == 'Amazing'">({{post.daysRemainInAmazing > 0 ? Math.round(post.daysRemainInAmazing) : ''}})</span></v-chip>
             </div>
           </v-col >
         </v-row>
-        <v-row row wrap :class="`pa-12`">
+        <v-row row wrap :class="`pa-12 ${post.status == 'Amazing' ? 'white--text' : ''}`">
           {{post.blogPostContent}}
         </v-row>
         <v-row row wrap justify="space-around" :class="`pa-12`">
@@ -49,7 +49,7 @@
             rounded
             class="my-2"
           >
-            <strong>{{ Math.ceil(post.shield) }} <v-icon small dark>mdi-shield</v-icon></strong>
+            <strong>{{ Math.ceil(post.shield) }} <v-icon small>mdi-shield</v-icon></strong>
           </v-progress-linear>
           <v-progress-linear
             :value="post.health"
@@ -64,7 +64,7 @@
           </v-btn>
           <v-col cols="12" md="12">
             <v-divider></v-divider>
-            <div class="text-center grey--text pa-5 display-1">Gallery</div><br/>
+            <div :class="`text-center pa-5 display-1 ${post.status == 'Amazing' ? 'white--text' : 'grey--text'}`">Gallery</div><br/>
             <div class="text-center">
               <v-btn class="ma-5 text-center" color="primary" dark v-if="!showGallery" @click="showGallery = true">
                 <v-icon>mdi-view-gallery</v-icon>Show Gallery

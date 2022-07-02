@@ -54,11 +54,38 @@
           
         </v-row>
         <v-row>
-          
+          <span>
+            <v-menu
+              rounded="rounded"
+            >
+              <template v-slot:activator="{ attrs, on }">
+                <v-btn
+                  color="teal darken-1"
+                  class="white--text mx-3"
+                  v-bind="attrs"
+                  v-on="on"
+                >
+                  Filter by category
+                </v-btn>
+              </template>
+  
+              <v-list>
+                <v-list-item
+                  v-for="category in categories"
+                  :key="category.id"
+                  link
+                  @change="changeCategory(category.name)"
+                >
+                  <v-list-item-title>{{category.name}}</v-list-item-title>
+                </v-list-item>
+              </v-list>
+            </v-menu>
+          </span>
           <span>
             <v-text-field dense label="Search" prepend-icon="mdi-magnify" single-line v-model="search" @keyup="SearchDbWithKeyword"></v-text-field>
           </span>
         <div class="mx-5">
+          
           <v-select
             :items="perPageSelect"
             label="Per Page"
@@ -89,7 +116,7 @@
           </v-col >
           <v-col cols="12" md="6">
             <div class="caption grey--text">Post title</div>
-            <router-link :to="{name:'Post',path:'/post/'+post.id,params:{id:post.id}}"><h2>{{post.title}}</h2></router-link>
+            <router-link :class="`${post.status == 'Amazing' ? 'white--text' : ''}`" :to="{name:'Post',path:'/post/'+post.id,params:{id:post.id}}"><h2>{{post.title}}</h2></router-link>
           </v-col >
           <v-col xs="2">
             <div class="caption grey--text">Author</div>
@@ -106,18 +133,56 @@
           <v-col xs="2">
             <div class="text-right">
               <div class="caption grey--text">Status</div>
-              <v-chip small :class="`${post.status} white--text caption my-2`">{{post.status}}&nbsp;<span v-if="post.status == 'Amazing'">(5)</span></v-chip>
+              <v-chip small :class="`${post.status} white--text caption my-2`">{{post.status}}&nbsp;<span v-if="post.status == 'Amazing'">({{Math.round(post.daysRemainInAmazing)}})</span></v-chip>
             </div>
           </v-col >
-          <!-- <v-col xs="2">
-            <div class="text-right">
-              <div class="caption grey--text">Amazing ends in:</div>
-              <v-chip small :class="`${post.status} white--text caption my-2`">days</v-chip>
-            </div>
-          </v-col > -->
         </v-row>
         <v-row row wrap :class="`pa-12 ${post.status == 'Amazing' ? 'white--text' : ''}` ">
           {{post.blogPostContent}}
+        </v-row>
+        <v-row row wrap :class="`pa-12 ${post.status == 'Amazing' ? 'white--text' : ''}` ">
+          <v-menu>
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn
+                class="ma-2"
+                v-bind="attrs"
+                v-on="on"
+                :dark="post.status != 'Amazing' ? true : false"
+                v-if="showSimulations"
+              >
+                Simulations
+              </v-btn>
+            </template>
+            <v-list>
+              <v-list-item
+              v-if="post.status != 'Amazing'"
+                @click="simulate(post.id,'Set Amazing')"
+              >
+                <v-list-item-title>Set Amazing</v-list-item-title>
+              </v-list-item>
+              <v-list-item
+              v-if="post.status != 'Amazing'"
+                @click="simulate(post.id,'Set Popular')"
+              >
+                <v-list-item-title>Set Popular</v-list-item-title>
+              </v-list-item>
+              <v-list-item
+                @click="simulate(post.id,'Set 1 Health')"
+              >
+                <v-list-item-title>Set 1 Health</v-list-item-title>
+              </v-list-item>
+              <v-list-item
+                @click="simulate(post.id,'Set 50 Health & Shield')"
+              >
+                <v-list-item-title>Set 50 Health & Shield</v-list-item-title>
+              </v-list-item>
+              <v-list-item
+                @click="simulate(post.id,'Set Max Health & Shield')"
+              >
+                <v-list-item-title>Set Max Health & Shield</v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-menu>
         </v-row>
         <v-row row wrap justify="space-around" :class="`pa-12`">
         <v-btn class="ma-5" fab :color="userAttackedPosts.includes(post.id) ? 'red' : ''" dark @click="Vote(1,post.id)">
@@ -142,7 +207,7 @@
             <strong>{{ Math.ceil(post.health) }}<v-icon>mdi-hospital</v-icon></strong>
           </v-progress-linear>
           <v-btn class="ma-5" fab :color="userDefendedPosts.includes(post.id) ? 'cyan' : ''" dark @click="Vote(2,post.id)">
-            <v-icon large>mdi-shield-half-full</v-icon>
+            <v-icon large>mdi-shield-half-full</v-icon><span v-if="post.status == 'Amazing'">x2</span>
           </v-btn>
         </v-row>
       </v-card>
@@ -190,6 +255,12 @@
     name: 'Home',
     data() {
       return{
+        categories:[
+          {name:'Travel',id:1},
+          {name:'Health',id:2},
+          {name:'Food',id:3},
+          ],
+        showSimulations: false,
         sortedBy:'title',
         sortedHow:'asc',
         search:'',
@@ -207,6 +278,39 @@
       }
     },
     methods: {
+      changeCategory(id) //or name
+      {
+        console.log(id)
+      },
+      simulate(postId,method)
+      {
+        // console.log(method+" on post id: "+postId)
+        var data = JSON.stringify({
+              "postId": postId,
+              "simAmazing": method === "Set Amazing" ? true : false,
+              "simPopular":  method === "Set Popular" ? true : false,
+              "sim1Hp":  method === "Set 1 Health" ? true : false,
+              "sim50HpShield":  method === "Set 50 Health & Shield" ? true : false,
+              "simMaxHpShield": method === "Set Max Health & Shield" ? true : false,
+            });
+            var config = {
+            method: 'put',
+            url: 'http://localhost:5000/api/simulations',
+            
+            headers: { 
+              'Authorization': 'Bearer '+localStorage.getItem("token"), 
+              'Content-Type': 'application/json'
+            },
+            data : data
+          };
+          axios(config)
+          .then(function(response){
+            // alert("Simulation done")
+            window.location.reload()
+          }).catch(function(error){
+            console.log(error);
+          })
+      },
       getHealthBarColor(health){
         // depending on health condition of the post display different color
         if(health > 66)
@@ -502,7 +606,7 @@
         this.networkError = false
         axios(config).then(function(response){
               // promeni stanje dugmeta 
-        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page=1&keyword='+dis.search+"&sort="+dis.sortedBy+"-"+dis.sortedHow,{
+        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page='+dis.page+'&keyword='+dis.search+"&sort="+dis.sortedBy+"-"+dis.sortedHow,{
             }).then(function(response){
                 dis.loadingPosts = false
                 dis.dbBlogPosts = response.data.data
@@ -538,6 +642,7 @@
       this.loadingPosts = true
       // prvo glasovi korisnika ako je ulogovan
       if(localStorage.getItem("token")){
+        this.showSimulations = true;
           const config = {
               headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
           };
@@ -574,7 +679,16 @@
                 // potencijalno pokrenuti ovaj zahtev u rekurziji u intervalima dok se ne izadje iz catch bloka
               }
             })
-        
+        axios.get('http://localhost:5000/api/categories',{
+            }).then(function(response){
+              dis.categories = response.data.data
+            }).catch(err => {
+              console.log(err);
+              if(err.code == "ERR_NETWORK")
+              {
+                dis.networkError = true
+              }
+            })
     }
 
   }

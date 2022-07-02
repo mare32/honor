@@ -329,7 +329,81 @@
         Logs
       </v-expansion-panel-header>
       <v-expansion-panel-content>
-        <v-simple-table
+            <!-- <v-col
+                cols="4"
+                lg="4"
+                style="display:inline-block"
+              >
+                <v-menu
+                  ref="menu1"
+                  v-model="menu1"
+                  :close-on-content-click="false"
+                  transition="scale-transition"
+                  offset-y
+                  max-width="290px"
+                  min-width="auto"
+                  style="display:inline-block"
+                >
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-text-field
+                      v-model="dateFromFormatted"
+                      label="Date From"
+                      hint="MM/DD/YYYY format"
+                      persistent-hint
+                      prepend-icon="mdi-calendar"
+                      v-bind="attrs"
+                      @blur="dateFrom = parseDate(dateFromFormatted)"
+                      v-on="on"
+                    ></v-text-field>
+                  </template>
+                  <v-date-picker
+                    v-model="dateFrom"
+                    no-title
+                    @input="menu1 = false"
+                  ></v-date-picker>
+                </v-menu>
+                </v-col>
+                <v-col
+                cols="4"
+                lg="4"
+                style="display:inline-block"
+              >
+                <v-menu
+                  ref="menu2"
+                  v-model="menu2"
+                  :close-on-content-click="false"
+                  transition="scale-transition"
+                  offset-y
+                  max-width="290px"
+                  min-width="auto"
+                  style="display:inline-block"
+                >
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-text-field
+                      v-model="dateToFormatted"
+                      label="Date To"
+                      hint="MM/DD/YYYY format"
+                      persistent-hint
+                      prepend-icon="mdi-calendar"
+                      v-bind="attrs"
+                      @blur="dateTo = parseDate(dateToFormatted)"
+                      v-on="on"
+                    ></v-text-field>
+                  </template>
+                  <v-date-picker
+                    v-model="dateTo"
+                    no-title
+                    @input="menu2 = false"
+                  ></v-date-picker>
+                </v-menu>
+                </v-col>
+                <v-select label="Filter by Use Case Name">
+
+                </v-select> -->
+
+
+                <!-- OLD SIMPLE TABLE OF LOGS -->
+        <!-- <v-simple-table
           fixed-header
           height="300px"
         >
@@ -370,7 +444,24 @@
               </tr>
             </tbody>
           </template>
-        </v-simple-table>
+        </v-simple-table> -->
+        <!-- OLD SIMPLE TABLE OF LOGS END -->
+        <v-card>
+          <v-card-title>
+            <v-text-field
+              v-model="search"
+              append-icon="mdi-magnify"
+              label="Search"
+              single-line
+              hide-details
+            ></v-text-field>
+          </v-card-title>
+          <v-data-table
+            :headers="logHeaders"
+            :items="logs"
+            :search="search"
+          ></v-data-table>
+        </v-card>
       </v-expansion-panel-content>
     </v-expansion-panel>
 
@@ -402,7 +493,29 @@
     name:'Panel',
     data () {
       return {
+        // dateFrom: (new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString(),
+        // dateFrom: new Date().toISOString().slice(0, 10),
+        // dateTo: (new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString(),
+        // today: new Date(),
+        // dateTo: (new Date().setDate(today.getDate()+1)).toISOString().slice(0, 10),
+        // dateFromFormatted: this.formatDate((new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString().substr(0, 10)),
+        // dateToFormatted: this.formatDate((new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString().substr(0, 10)),
         loggedUser:null,
+        // menu1:false,
+        // menu2:false,
+         search: '',
+          logHeaders: [
+            {
+              text: 'Use Case Name',
+              align: 'start',
+              value: 'useCaseName',
+            },
+            { text: 'Username', value: 'username' },
+            { text: 'User Id', value: 'userId' },
+            { text: 'Executed at', value: 'executedAt' },
+            { text: 'Data', value: 'data' },
+            { text: 'Is Authorized', value: 'isAuthorized' },
+          ],
         expanded: [],
         singleExpand: false,
         dessertHeaders: [
@@ -430,6 +543,22 @@
         newCategoryName:''
       }
     },
+    // computed: {
+    //   computedDateFromFormatted () {
+    //     return this.formatDate(this.dateFrom)
+    //   },
+    //   computedDateToFormatted () {
+    //     return this.formatDate(this.dateTo)
+    //   },
+    // },
+    // watch: {
+    //   dateFrom (val) {
+    //     this.dateFromFormatted = this.formatDate(this.dateFrom)
+    //   },
+    //   dateTo (val) {
+    //     this.dateToFormatted = this.formatDate(this.dateTo)
+    //   },
+    // },
     created(){
         if(!localStorage.getItem("token"))
              setTimeout(function(){window.location.href = "/"},3000)
@@ -451,7 +580,6 @@
             })
     },
     mounted(){
-            let td = new Date().toISOString().slice(0, 10)
             const config = {
                 headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
             };
@@ -482,9 +610,14 @@
             }).catch(err => {
                 console.log(err);
             })
-          td = td.toString()
+            let td = new Date().toISOString().slice(0, 10)
+            let today = new Date()
+            let tmrw = new Date(today)
+            tmrw.setDate(tmrw.getDate()+1)
+            tmrw = tmrw.toISOString().slice(0, 10)
+            console.log(tmrw);
           // dateFrom should be dynamic and customizable
-        axios.get('http://localhost:5000/api/useCaseLogs?dateFrom='+td+'&dateTo=2022-07-30',config)
+        axios.get('http://localhost:5000/api/useCaseLogs?dateFrom='+td+'&dateTo='+tmrw,config)
              .then(function(response)
             {
               let tmpVal;
@@ -502,6 +635,18 @@
             })
     },
     methods:{
+      // formatDate (date) {
+      //   if (!date) return null
+
+      //   const [year, month, day] = date.split('-')
+      //   return `${month}/${day}/${year}`
+      // },
+      // parseDate (date) {
+      //   if (!date) return null
+
+      //   const [month, day, year] = date.split('/')
+      //   return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
+      // },
       getHealthBarColor(health){
         // depending on health condition of the post display different color
         if(health > 66)
