@@ -55,7 +55,16 @@
         </v-row>
         <v-row>
           <span>
-            <v-menu
+            <v-select
+              :items="categories"
+              label="Filter by category"
+              dense
+              v-model="selectedCategory"
+              outlined
+              @change="changeCategory"
+            >
+            </v-select>
+            <!-- <v-menu
               rounded="rounded"
             >
               <template v-slot:activator="{ attrs, on }">
@@ -79,7 +88,7 @@
                   <v-list-item-title>{{category.name}}</v-list-item-title>
                 </v-list-item>
               </v-list>
-            </v-menu>
+            </v-menu> -->
           </span>
           <span>
             <v-text-field dense label="Search" prepend-icon="mdi-magnify" single-line v-model="search" @keyup="SearchDbWithKeyword"></v-text-field>
@@ -207,7 +216,8 @@
             <strong>{{ Math.ceil(post.health) }}<v-icon>mdi-hospital</v-icon></strong>
           </v-progress-linear>
           <v-btn class="ma-5" fab :color="userDefendedPosts.includes(post.id) ? 'cyan' : ''" dark @click="Vote(2,post.id)">
-            <v-icon large>mdi-shield-half-full</v-icon><span v-if="post.status == 'Amazing'">x2</span>
+            <v-icon large v-if="post.status != 'Amazing'">mdi-shield-half-full</v-icon>
+            <v-icon large v-else>mdi-shield-star</v-icon>
           </v-btn>
         </v-row>
       </v-card>
@@ -255,11 +265,8 @@
     name: 'Home',
     data() {
       return{
-        categories:[
-          {name:'Travel',id:1},
-          {name:'Health',id:2},
-          {name:'Food',id:3},
-          ],
+        categories:['All'],
+        selectedCategory:'All',
         showSimulations: false,
         sortedBy:'title',
         sortedHow:'asc',
@@ -278,9 +285,9 @@
       }
     },
     methods: {
-      changeCategory(id) //or name
+      changeCategory() //or name
       {
-        console.log(id)
+        console.log(this.selectedCategory)
       },
       simulate(postId,method)
       {
@@ -681,7 +688,8 @@
             })
         axios.get('http://localhost:5000/api/categories',{
             }).then(function(response){
-              dis.categories = response.data.data
+              for(let cat of response.data.data)
+                dis.categories.push(cat.name)
             }).catch(err => {
               console.log(err);
               if(err.code == "ERR_NETWORK")
