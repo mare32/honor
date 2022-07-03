@@ -53,6 +53,10 @@
             Close
           </v-btn>
           <v-spacer></v-spacer>
+        <v-alert type="error" v-if="alert">
+         Login failed. Combination of email and password was not found.
+        </v-alert>
+        <v-spacer></v-spacer>
           <v-btn
             color="green darken-1"
             text
@@ -75,13 +79,15 @@ export default {
         dialog: false,
         email:'',
         password:'',
-        loading:false
+        loading:false,
+        alert:false,
     }),
     mounted(){
     },
     methods:{
       handleLogin(){
         let vm = this
+        this.alert = false
         this.loading = true
             axios.post('http://localhost:5000/api/token',{
                 email:this.email,
@@ -92,6 +98,7 @@ export default {
                 window.location.reload()
                 // setTimeout(function(){window.location.reload()},1000)
             }).catch(function(){
+               vm.alert = true
                vm.loading = false
             })
       }
