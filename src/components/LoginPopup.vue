@@ -35,7 +35,7 @@
               <v-col cols="12">
                 <v-text-field
                   solo
-                  label="Password*"
+                  label="Password"
                   required
                   type="password"
                   v-model="password"
