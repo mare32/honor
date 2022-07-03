@@ -173,6 +173,18 @@
               >
                 <v-list-item-title>Set Max Health & Shield</v-list-item-title>
               </v-list-item>
+              <v-list-item
+              v-if="post.status == 'Amazing'"
+                @click="simulate(post.id,'Set AmazingSince-1')"
+              >
+                <v-list-item-title>Reduce Amazing days by 1</v-list-item-title>
+              </v-list-item>
+              <v-list-item
+              v-if="post.status == 'Amazing'"
+                @click="simulate(post.id,'Set AmazingSince-5')"
+              >
+                <v-list-item-title>Reduce Amazing days by 5</v-list-item-title>
+              </v-list-item>
             </v-list>
           </v-menu>
         </v-row>
@@ -303,6 +315,8 @@
               "sim1Hp":  method === "Set 1 Health" ? true : false,
               "sim50HpShield":  method === "Set 50 Health & Shield" ? true : false,
               "simMaxHpShield": method === "Set Max Health & Shield" ? true : false,
+              "reduceAmazingDays1": method === "Set AmazingSince-1" ? true : false,
+              "reduceAmazingDays5": method === "Set AmazingSince-5" ? true : false,
             });
             var config = {
             method: 'put',
