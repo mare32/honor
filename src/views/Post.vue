@@ -1,5 +1,15 @@
 <template>
   <div>
+    <v-alert
+      :value="alert"
+      color="error"
+      dark
+      class="fxd"
+      icon="mdi-account"
+      transition="scale-transition"
+    >
+      You need to be signed in for that action.
+    </v-alert>
     <div v-if="post">
         <v-card class="my-5" :img="post.status == 'Amazing' ? '/img/amazing.jpg' : ''">
         <v-row row wrap :class="`pr-12 pa-3 post ${post.status}`">
@@ -245,6 +255,7 @@ export default {
     name:'Post',
     data(){
         return {
+            alert:false,
             post:null,
             comments:[],
             subcomments:[],
@@ -374,7 +385,9 @@ export default {
       {
         if(!localStorage.getItem('token'))
         {
-          alert("You are not logged in, thus you cannot comment.")
+          this.alert = true
+          let dis = this
+          setTimeout(function(){dis.alert = false},2000)
         }
         else{
           let commentText = this.newCommentText;
@@ -540,7 +553,8 @@ export default {
           })
         }
         else{
-          alert("Unauthorized - please log in to interact with posts")
+           dis.alert = true
+           setTimeout(function(){dis.alert = false},2000)
         }
       },
       Vote(type,commId){
@@ -611,7 +625,8 @@ export default {
           })
             }
             else{
-              alert("Unauthorized to vote")
+              dis.alert = true
+              setTimeout(function(){dis.alert = false},2000)
             }
       },
     }

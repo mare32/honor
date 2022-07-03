@@ -1,6 +1,5 @@
 <template>
 <div class="home">
-  <!-- <p class="headline grey--text text-center">Home</p> -->
   <v-alert
       :value="alert"
       color="error"
@@ -22,7 +21,6 @@
               <span class="black--text">Sorting:</span>
             </v-btn>
             </template>
-            <!-- <span>Sort by name</span> -->
           </v-tooltip>
           <v-tooltip top small>
              <template v-slot:activator="{on, attrs}">
@@ -74,31 +72,6 @@
               @change="changeCategory"
             >
             </v-select>
-            <!-- <v-menu
-              rounded="rounded"
-            >
-              <template v-slot:activator="{ attrs, on }">
-                <v-btn
-                  color="teal darken-1"
-                  class="white--text mx-3"
-                  v-bind="attrs"
-                  v-on="on"
-                >
-                  Filter by category
-                </v-btn>
-              </template>
-  
-              <v-list>
-                <v-list-item
-                  v-for="category in categories"
-                  :key="category.id"
-                  link
-                  @change="changeCategory(category.name)"
-                >
-                  <v-list-item-title>{{category.name}}</v-list-item-title>
-                </v-list-item>
-              </v-list>
-            </v-menu> -->
           </span>
           <span>
             <v-text-field dense label="Search" prepend-icon="mdi-magnify" single-line v-model="search" @keyup="SearchDbWithKeyword"></v-text-field>
@@ -666,7 +639,6 @@
           })
             }
             else{
-              // alert("Unauthorized to vote")
               dis.alert = true
               setTimeout(function(){dis.alert = false},2000)
             }
