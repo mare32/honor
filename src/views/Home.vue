@@ -1,6 +1,16 @@
 <template>
 <div class="home">
   <!-- <p class="headline grey--text text-center">Home</p> -->
+  <v-alert
+      :value="alert"
+      color="error"
+      dark
+      class="fxd"
+      icon="mdi-account"
+      transition="scale-transition"
+    >
+      Please sign in to vote.
+    </v-alert>
     <v-container class="my-5">
       <v-layout row class="mb-3">
         <v-row>
@@ -265,6 +275,7 @@
     name: 'Home',
     data() {
       return{
+        alert:false,
         categories:['All'],
         selectedCategory:'All',
         showSimulations: false,
@@ -288,6 +299,26 @@
       changeCategory() //or name
       {
         console.log(this.selectedCategory)
+        let dis = this
+        this.loadingPosts = true
+        this.networkError = false
+        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page=1&keyword='+dis.search+"&sort="+dis.sortedBy+"-"+dis.sortedHow+'&categoryName='+dis.selectedCategory,{
+            }).then(function(response){
+                dis.loadingPosts = false
+                dis.dbBlogPosts = response.data.data
+                for(let post of dis.dbBlogPosts)
+                {
+                  post.createdAt = post.createdAt.split("T")
+                  post.createdAt = post.createdAt[0]
+                }
+                dis.pages = []
+                for(let i = 1; i <= response.data.pagesCount; i++)
+                dis.pages.push(i)
+            }).catch(err => {
+              console.log(err);
+              if(err.code == "ERR_NETWORK")
+              dis.networkError = true
+            })
       },
       simulate(postId,method)
       {
@@ -335,7 +366,7 @@
             this.sortedHow = 'desc'
             this.sortedBy = 'title'
 
-        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page='+dis.page+'&keyword='+dis.search+"&sort="+dis.sortedBy+"-"+dis.sortedHow,{
+        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page='+dis.page+'&keyword='+dis.search+"&sort="+dis.sortedBy+"-"+dis.sortedHow+'&categoryName='+dis.selectedCategory,{
             }).then(function(response){
                 dis.loadingPosts = false
                 dis.dbBlogPosts = response.data.data
@@ -356,7 +387,7 @@
             this.sortedHow = 'asc'
             this.sortedBy = 'title'
 
-        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page='+dis.page+'&keyword='+dis.search+"&sort="+dis.sortedBy+"-"+dis.sortedHow,{
+        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page='+dis.page+'&keyword='+dis.search+"&sort="+dis.sortedBy+"-"+dis.sortedHow+'&categoryName='+dis.selectedCategory,{
             }).then(function(response){
                 dis.loadingPosts = false
                 dis.dbBlogPosts = response.data.data
@@ -377,7 +408,7 @@
           if(this.sortedHow === 'asc'){
             this.sortedHow = 'desc'
             this.sortedBy = 'author'
-        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page='+dis.page+'&keyword='+dis.search+"&sort="+dis.sortedBy+"-"+dis.sortedHow,{
+        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page='+dis.page+'&keyword='+dis.search+"&sort="+dis.sortedBy+"-"+dis.sortedHow+'&categoryName='+dis.selectedCategory,{
             }).then(function(response){
                 dis.loadingPosts = false
                 dis.dbBlogPosts = response.data.data
@@ -396,7 +427,7 @@
             this.sortedHow = 'asc'
             this.sortedBy = 'author'
 
-        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page='+dis.page+'&keyword='+dis.search+"&sort="+dis.sortedBy+"-"+dis.sortedHow,{
+        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page='+dis.page+'&keyword='+dis.search+"&sort="+dis.sortedBy+"-"+dis.sortedHow+'&categoryName='+dis.selectedCategory,{
             }).then(function(response){
                 dis.loadingPosts = false
                 dis.dbBlogPosts = response.data.data
@@ -418,7 +449,7 @@
             this.sortedHow = 'desc'
             this.sortedBy = 'health'
 
-        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page='+dis.page+'&keyword='+dis.search+"&sort="+dis.sortedBy+"-"+dis.sortedHow,{
+        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page='+dis.page+'&keyword='+dis.search+"&sort="+dis.sortedBy+"-"+dis.sortedHow+'&categoryName='+dis.selectedCategory,{
             }).then(function(response){
                 dis.loadingPosts = false
                 dis.dbBlogPosts = response.data.data
@@ -437,7 +468,7 @@
             this.sortedHow = 'asc'
             this.sortedBy = 'health'
 
-        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page='+dis.page+'&keyword='+dis.search+"&sort="+dis.sortedBy+"-"+dis.sortedHow,{
+        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page='+dis.page+'&keyword='+dis.search+"&sort="+dis.sortedBy+"-"+dis.sortedHow+'&categoryName='+dis.selectedCategory,{
             }).then(function(response){
                 dis.loadingPosts = false
                 dis.dbBlogPosts = response.data.data
@@ -458,7 +489,7 @@
           if(this.sortedHow === 'asc'){
             this.sortedHow = 'desc'
             this.sortedBy = 'createdAt'
-        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page='+dis.page+'&keyword='+dis.search+"&sort="+dis.sortedBy+"-"+dis.sortedHow,{
+        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page='+dis.page+'&keyword='+dis.search+"&sort="+dis.sortedBy+"-"+dis.sortedHow+'&categoryName='+dis.selectedCategory,{
             }).then(function(response){
                 dis.loadingPosts = false
                 dis.dbBlogPosts = response.data.data
@@ -477,7 +508,7 @@
             this.sortedHow = 'asc'
             this.sortedBy = 'createdAt'
 
-        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page='+dis.page+'&keyword='+dis.search+"&sort="+dis.sortedBy+"-"+dis.sortedHow,{
+        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page='+dis.page+'&keyword='+dis.search+"&sort="+dis.sortedBy+"-"+dis.sortedHow+'&categoryName='+dis.selectedCategory,{
             }).then(function(response){
                 dis.loadingPosts = false
                 dis.dbBlogPosts = response.data.data
@@ -500,7 +531,7 @@
         let dis = this
         this.loadingPosts = true
         this.networkError = false
-        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page='+dis.page+'&keyword='+dis.search+"&sort="+dis.sortedBy+"-"+dis.sortedHow,{
+        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page='+dis.page+'&keyword='+dis.search+"&sort="+dis.sortedBy+"-"+dis.sortedHow+'&categoryName='+dis.selectedCategory,{
             }).then(function(response){
                 dis.loadingPosts = false
                 dis.dbBlogPosts = response.data.data
@@ -519,7 +550,7 @@
         let dis = this
         this.loadingPosts = true
         this.networkError = false
-        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page=1&keyword='+dis.search+"&sort="+dis.sortedBy+"-"+dis.sortedHow,{
+        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page=1&keyword='+dis.search+"&sort="+dis.sortedBy+"-"+dis.sortedHow+'&categoryName='+dis.selectedCategory,{
             }).then(function(response){
                 dis.loadingPosts = false
                 dis.dbBlogPosts = response.data.data
@@ -546,7 +577,7 @@
           this.page = 1
         this.activePage = 1
         }
-        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page=1&keyword='+dis.search+"&sort="+dis.sortedBy+"-"+dis.sortedHow,{
+        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page=1&keyword='+dis.search+"&sort="+dis.sortedBy+"-"+dis.sortedHow+'&categoryName='+dis.selectedCategory,{
             }).then(function(response){
                 dis.dbBlogPosts = response.data.data
                 dis.loadingPosts = false
@@ -613,7 +644,7 @@
         this.networkError = false
         axios(config).then(function(response){
               // promeni stanje dugmeta 
-        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page='+dis.page+'&keyword='+dis.search+"&sort="+dis.sortedBy+"-"+dis.sortedHow,{
+        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page='+dis.page+'&keyword='+dis.search+"&sort="+dis.sortedBy+"-"+dis.sortedHow+'&categoryName='+dis.selectedCategory,{
             }).then(function(response){
                 dis.loadingPosts = false
                 dis.dbBlogPosts = response.data.data
@@ -635,7 +666,9 @@
           })
             }
             else{
-              alert("Unauthorized to vote")
+              // alert("Unauthorized to vote")
+              dis.alert = true
+              setTimeout(function(){dis.alert = false},2000)
             }
       }
     },
@@ -665,7 +698,7 @@
               }
               })
             }
-        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page=1&keyword='+dis.search+"&sort="+dis.sortedBy+"-"+dis.sortedHow,{
+        axios.get('http://localhost:5000/api/blogposts?notInvisOrDead=true&perPage='+dis.perPage+'&page=1&keyword='+dis.search+"&sort="+dis.sortedBy+"-"+dis.sortedHow+'&categoryName='+dis.selectedCategory,{
             }).then(function(response){
               dis.totalCountOfPosts = response.data.totalCount // TOTAL COUNT
               // console.log(response.data.data)
@@ -703,6 +736,13 @@
 </script>
 
 <style>
+  .fxd{
+   position: fixed;
+  left: 50%;
+  top: 40%;
+   z-index: 999999;
+  transform: translate(-50%, -50%);
+  }
   .post.Alive{
     border-left:4px solid rgb(12, 213, 116);
   }
