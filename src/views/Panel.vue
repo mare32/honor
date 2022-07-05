@@ -688,7 +688,7 @@
           axios(config)
                .then(function(response)
               {
-                  alert('Uloga promenjena')
+                  // alert('Uloga promenjena')
                   window.location.reload()
               }).catch(err => {
                   alert(err.response.data.message)
@@ -715,11 +715,11 @@
         axios(config)
             .then(function(response)
             {
-                alert('Korisnik je obrisan')
+                // alert('Korisnik je obrisan')
                 dis.loading = false
                 window.location.reload()
             }).catch(err => {
-                alert('Something went wrong')
+                // alert('Something went wrong')
                 console.log(err);
             })
         }
@@ -738,11 +738,11 @@
         axios(config)
             .then(function(response)
             {
-                alert('Objava obrisana')
+                // alert('Objava obrisana')
                 dis.loading = false
                 window.location.reload()
             }).catch(err => {
-                alert('Nesto je krenulo po zlu')
+                // alert('Nesto je krenulo po zlu')
                 console.log(err);
             })
       },
@@ -764,7 +764,7 @@
           axios(config)
                .then(function(response)
               {
-                  alert('Objava je sakrivena')
+                  // alert('Objava je sakrivena')
                   window.location.reload()
               }).catch(err => {
                   alert(err.response.data.message)
@@ -776,7 +776,7 @@
         if(this.newCategoryName == '')
         {
           //klijentska validacija
-          alert("Niste uneli ime kategorije")
+          // alert("Niste uneli ime kategorije")
         }else{
           let newName = this.newCategoryName
            var data = JSON.stringify({
@@ -794,7 +794,7 @@
             axios(config)
                  .then(function(response)
                 {
-                    alert('Kategorija je dodata')
+                    // alert('Kategorija je dodata')
                     window.location.reload()
                 }).catch(err => {
                     alert(err.response.data.message)
@@ -816,11 +816,11 @@
         axios(config)
             .then(function(response)
             {
-                alert('Kategorija obrisana')
+                // alert('Kategorija obrisana')
                 dis.loading = false
                 window.location.reload()
             }).catch(err => {
-                alert('Kategorija je vec vezana za neke objave, brisanje je otkazano.')
+                alert('Category is connected to some posts, deletion is aborted.')
                 console.log(err);
             })
       }
